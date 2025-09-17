@@ -1,37 +1,63 @@
 package frc.robot.hardware.motor;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.RobotController;
+import java.util.function.Consumer;
+import org.littletonrobotics.junction.Logger;
 
-public class TalonFXMotor extends SubsystemBase implements MotorIO {
+public class TalonFXMotor implements MotorIO {
   private TalonFX motor;
-  private MotorConfiguration config;
   private DCMotorModel model;
-  private double volts;
+  private MotorIOInputsAutoLogged inputs;
+  private TorqueCurrentFOC currentRequest;
 
-  public TalonFXMotor(int canID, MotorConfiguration config, DCMotorModel model) {
-    this(canID, "", config, model);
+  public TalonFXMotor(int deviceID, CANBus canbus, Consumer<TalonFX> config, DCMotorModel model) {
+    motor = new TalonFX(deviceID, canbus);
+    config.accept(motor);
+    this.model = model;
+    currentRequest = new TorqueCurrentFOC(0);
   }
 
-  public TalonFXMotor(int canID, String canbus, MotorConfiguration config, DCMotorModel model) {
-    motor = new TalonFX(canID, canbus);
-    applyConfig(config);
-    this.model = model;
+  public TalonFXMotor(int deviceID, Consumer<TalonFX> config, DCMotorModel model) {
+    this(deviceID, new CANBus(""), config, model);
+  }
+
+  public TalonFXMotor(
+      int deviceID, CANBus canbus, TalonFXConfiguration config, DCMotorModel model) {
+    this(
+        deviceID,
+        canbus,
+        fx -> {
+          StatusCode status = StatusCode.StatusCodeNotInitialized;
+          for (int i = 0; i < 5 && status != StatusCode.OK; i++) {
+            status = fx.getConfigurator().apply(config);
+          }
+        },
+        model);
+  }
+
+  public TalonFXMotor(int deviceID, TalonFXConfiguration config, DCMotorModel model) {
+    this(deviceID, new CANBus(""), config, model);
   }
 
   @Override
   public void setVoltage(double volts) {
-    this.volts = volts;
+    motor.setVoltage(volts);
   }
 
   @Override
-  public double getVoltage() {
-    return motor.getMotorVoltage().getValueAsDouble();
+  public void setCurrent(double amps) {
+    if (motor.getIsProLicensed().getValue()) {
+      motor.setControl(currentRequest.withOutput(amps));
+    } else {
+      setVoltage(model.getVoltage(amps, inputs.velocity, inputs.statorVoltage));
+    }
   }
 
   @Override
@@ -40,50 +66,42 @@ public class TalonFXMotor extends SubsystemBase implements MotorIO {
   }
 
   @Override
-  public void applyConfig(MotorConfiguration config) {
-    TalonFXConfiguration talonConfig = new TalonFXConfiguration();
-    talonConfig.CurrentLimits.StatorCurrentLimitEnable = config.statorCurrentLimit.isPresent();
-    talonConfig.CurrentLimits.StatorCurrentLimit = config.statorCurrentLimit.orElse(0);
-    talonConfig.CurrentLimits.StatorCurrentLimitEnable = config.statorCurrentLimit.isPresent();
-    talonConfig.CurrentLimits.SupplyCurrentLimit = config.supplyCurrentLimit.orElse(0);
-    talonConfig.CurrentLimits.SupplyCurrentLimitEnable = config.supplyCurrentLimit.isPresent();
-    talonConfig.Voltage.PeakReverseVoltage = config.maxNegativeVoltage;
-    talonConfig.Voltage.PeakForwardVoltage = config.maxPositiveVoltage;
-    talonConfig.MotorOutput.Inverted =
-        config.inverted
-            ? InvertedValue.Clockwise_Positive
-            : InvertedValue.CounterClockwise_Positive;
-    talonConfig.MotorOutput.NeutralMode =
-        config.brakeModeEnabled ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-    StatusCode code = StatusCode.StatusCodeNotInitialized;
-    for (int i = 0; i < 5 && code != StatusCode.OK; i++) {
-      code = motor.getConfigurator().apply(talonConfig);
-    }
-    this.config = config.clone();
-  }
-
-  @Override
-  public MotorConfiguration getConfig() {
-    return config.clone();
-  }
-
-  @Override
   public double getPosition() {
-    return Units.rotationsToRadians(motor.getPosition().getValueAsDouble());
+    return inputs.position;
   }
 
   @Override
   public double getVelocity() {
-    return Units.rotationsToRadians(motor.getVelocity().getValueAsDouble());
+    return inputs.velocity;
+  }
+
+  @Override
+  public double getTorque() {
+    return model.getTorque(inputs.statorCurrent, inputs.velocity);
   }
 
   @Override
   public void setPosition(double newValue) {
-    motor.setPosition(Units.radiansToRotations(newValue));
+    motor.setPosition(newValue);
   }
 
   @Override
-  public void periodic() {
-    motor.setVoltage(volts);
+  public void updateSim(double acceleration, double dt) {
+    TalonFXSimState simState = motor.getSimState();
+    double vel = acceleration * dt + inputs.velocity;
+    double pos = 0.5 * (vel + inputs.velocity) * dt;
+    simState.setSupplyVoltage(RobotController.getBatteryVoltage());
+    simState.setRawRotorPosition(Units.radiansToRotations(pos));
+    simState.setRotorVelocity(Units.radiansToRotations(vel));
+  }
+
+  @Override
+  public void updateInputs(String name) {
+    inputs.statorVoltage = motor.getMotorVoltage().getValueAsDouble();
+    inputs.position = Units.rotationsToRadians(motor.getPosition().getValueAsDouble());
+    inputs.velocity = Units.rotationsToRadians(motor.getVelocity().getValueAsDouble());
+    inputs.statorCurrent = motor.getStatorCurrent().getValueAsDouble();
+    inputs.supplyCurrent = motor.getSupplyCurrent().getValueAsDouble();
+    Logger.processInputs(name, inputs);
   }
 }

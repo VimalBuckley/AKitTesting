@@ -1,33 +1,59 @@
 package frc.robot.hardware.motor;
 
+import com.revrobotics.REVLibError;
+import com.revrobotics.sim.SparkMaxSim;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.Optional;
+import edu.wpi.first.wpilibj.RobotController;
+import java.util.function.Consumer;
+import org.littletonrobotics.junction.Logger;
 
-public class SparkMaxMotor extends SubsystemBase implements MotorIO {
+public class SparkMaxMotor implements MotorIO {
   private SparkMax motor;
-  private MotorConfiguration config;
   private DCMotorModel model;
-  private double volts;
+  private MotorIOInputsAutoLogged inputs;
 
-  public SparkMaxMotor(int canID, MotorConfiguration config, DCMotorModel model) {
-    motor = new SparkMax(canID, MotorType.kBrushless);
-    applyConfig(config);
+  public SparkMaxMotor(int deviceID, Consumer<SparkMax> config, DCMotorModel model) {
+    motor = new SparkMax(deviceID, MotorType.kBrushless);
+    config.accept(motor);
     this.model = model;
+  }
+
+  public SparkMaxMotor(int deviceID, SparkMaxConfig config, DCMotorModel model) {
+    this(
+        deviceID,
+        spark -> {
+          REVLibError status = REVLibError.kUnknown;
+          for (int i = 0; i < 5 && status != REVLibError.kOk; i++) {
+            spark.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+          }
+        },
+        model);
+  }
+
+  @Override
+  public void updateInputs(String name) {
+    inputs.statorVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
+    inputs.position = Units.rotationsToRadians(motor.getEncoder().getPosition());
+    inputs.velocity = Units.rotationsPerMinuteToRadiansPerSecond(motor.getEncoder().getVelocity());
+    inputs.statorCurrent = motor.getOutputCurrent();
+    inputs.supplyCurrent = motor.getAppliedOutput() * inputs.statorCurrent;
+    Logger.processInputs(name, inputs);
   }
 
   @Override
   public void setVoltage(double volts) {
-    this.volts = volts;
+    motor.setVoltage(volts);
   }
 
   @Override
-  public double getVoltage() {
-    return motor.getAppliedOutput() * motor.getBusVoltage();
+  public void setCurrent(double amps) {
+    motor.getClosedLoopController().setReference(amps, ControlType.kCurrent);
   }
 
   @Override
@@ -36,42 +62,30 @@ public class SparkMaxMotor extends SubsystemBase implements MotorIO {
   }
 
   @Override
-  public void applyConfig(MotorConfiguration config) {
-    SparkMaxConfig sparkConfig = new SparkMaxConfig();
-    config.statorCurrentLimit.ifPresent(sparkConfig::smartCurrentLimit);
-    sparkConfig.inverted(config.inverted);
-    sparkConfig.idleMode(config.brakeModeEnabled ? IdleMode.kBrake : IdleMode.kCoast);
-    this.config = config.clone();
-  }
-
-  @Override
-  public MotorConfiguration getConfig() {
-    return config.clone();
-  }
-
-  @Override
   public double getPosition() {
-    return Units.rotationsToRadians(motor.getEncoder().getPosition());
+    return inputs.position;
   }
 
   @Override
   public double getVelocity() {
-    return Units.rotationsPerMinuteToRadiansPerSecond(motor.getEncoder().getVelocity());
+    return inputs.velocity;
   }
 
   @Override
-  public void setPosition(double position) {
-    motor.getEncoder().setPosition(Units.radiansToRotations(position));
+  public double getTorque() {
+    return model.getTorque(inputs.statorCurrent, inputs.velocity);
   }
 
   @Override
-  public void periodic() {
-    double appliedVolts =
-        model.getCurrentLimitedVoltage(
-            Optional.empty(), // Spark maxes have a stator limit, so we can let them do that part
-            config.supplyCurrentLimit,
-            getVelocity(),
-            volts);
-    motor.setVoltage(appliedVolts);
+  public void setPosition(double newValue) {
+    motor.getEncoder().setPosition(newValue);
+  }
+
+  @Override
+  public void updateSim(double acceleration, double dt) {
+    SparkMaxSim sim = new SparkMaxSim(motor, model);
+    double vel = inputs.velocity + acceleration * dt;
+    sim.iterate(
+        Units.radiansPerSecondToRotationsPerMinute(vel), RobotController.getBatteryVoltage(), dt);
   }
 }

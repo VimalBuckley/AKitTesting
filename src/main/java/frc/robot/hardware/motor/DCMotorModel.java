@@ -58,12 +58,27 @@ public class DCMotorModel extends DCMotor {
   public double getTorque(
       Optional<Integer> statorLimitAmps,
       Optional<Integer> supplyLimitAmps,
-      double speedRadiansPerSecond,
+      double speedRadiansPerSec,
       double voltageInputVolts) {
     double statorCurrent =
-        getCurrent(statorLimitAmps, supplyLimitAmps, speedRadiansPerSecond, voltageInputVolts);
-    double freeCurrent = freeCurrentAmps * speedRadiansPerSecond / freeCurrentAmps;
-    return KtNMPerAmp * (statorCurrent - freeCurrent);
+        getCurrent(statorLimitAmps, supplyLimitAmps, speedRadiansPerSec, voltageInputVolts);
+    return getTorque(statorCurrent, speedRadiansPerSec);
+  }
+
+  public double getTorque(double currentAmps, double speedRadiansPerSec) {
+    return Math.signum(currentAmps)
+        * getTorque(
+            Math.abs(currentAmps)
+                - freeCurrentAmps * Math.abs(speedRadiansPerSec) / freeSpeedRadPerSec);
+  }
+
+  public double getCurrent(double torqueNm, double speedRadiansPerSec) {
+    return torqueNm / KtNMPerAmp + freeCurrentAmps * speedRadiansPerSec / freeSpeedRadPerSec;
+  }
+
+  public double getVoltage(
+      double currentAmps, double speedRadiansPerSec, double voltageInputVolts) {
+    return (voltageInputVolts - KvRadPerSecPerVolt * speedRadiansPerSec) / rOhms;
   }
 
   public double getCurrentLimitedVoltage(
