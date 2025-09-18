@@ -19,14 +19,12 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.hardware.IOLayer;
-import frc.robot.hardware.mechanisms.FlywheelMechanism;
-import frc.robot.hardware.motor.TalonFXMotor;
+import frc.robot.hardware.mechanisms.flywheels.FlywheelMechanism;
+import frc.robot.hardware.motors.MotorIO;
+import frc.robot.hardware.motors.TalonFXMotor;
 import frc.robot.utilities.FeedbackController.PIDFeedback;
 import frc.robot.utilities.FeedbackController.ProfiledFeedback;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -42,19 +40,19 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
   public static ArrayList<Double> supplyCurrents;
-  public static HashMap<String, IOLayer> ios;
+  public static ArrayList<MotorIO> ios;
   private FlywheelMechanism flywheel;
 
   public Robot() {
     setupAdvantageKit();
     new ProfiledFeedback(5, new Constraints(4, 5));
     supplyCurrents = new ArrayList<>();
-    ios = new HashMap<>();
+    ios = new ArrayList<>();
     flywheel =
         new FlywheelMechanism(
-            "Test Flywheel",
             new TalonFXMotor(
-                1, new TalonFXConfiguration(), DCMotor.getKrakenX60(1)),
+                "Test Flywheel/Spin Motor", 1, new TalonFXConfiguration(), DCMotor.getKrakenX60(1)),
+            1,
             1,
             0.01,
             new PIDFeedback(0));
@@ -68,8 +66,8 @@ public class Robot extends LoggedRobot {
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    for (Map.Entry<String, IOLayer> io : ios.entrySet()) {
-      io.getValue().updateInputs(io.getKey());
+    for (MotorIO io : ios) {
+      io.updateInputs();
     }
     CommandScheduler.getInstance().run();
   }

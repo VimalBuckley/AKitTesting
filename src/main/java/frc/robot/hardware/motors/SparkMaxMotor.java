@@ -1,4 +1,4 @@
-package frc.robot.hardware.motor;
+package frc.robot.hardware.motors;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.sim.SparkMaxSim;
@@ -7,27 +7,24 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
-public class SparkMaxMotor implements MotorIO {
+public class SparkMaxMotor extends MotorIO {
   private SparkMax motor;
-  private DCMotor model;
-  private MotorIOInputsAutoLogged inputs;
 
-  public SparkMaxMotor(int deviceID, Consumer<SparkMax> config, DCMotor model) {
+  public SparkMaxMotor(String name, int deviceID, Consumer<SparkMax> config, DCMotor model) {
+    super(name, model);
     motor = new SparkMax(deviceID, MotorType.kBrushless);
     config.accept(motor);
-    this.model = model;
-    inputs = new MotorIOInputsAutoLogged();
   }
 
-  public SparkMaxMotor(int deviceID, SparkMaxConfig config, DCMotor model) {
+  public SparkMaxMotor(String name, int deviceID, SparkMaxConfig config, DCMotor model) {
     this(
+        name,
         deviceID,
         spark -> {
           REVLibError status = REVLibError.kUnknown;
@@ -39,7 +36,7 @@ public class SparkMaxMotor implements MotorIO {
   }
 
   @Override
-  public void updateInputs(String name) {
+  public void updateInputs() {
     inputs.statorVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
     inputs.supplyVoltage = motor.getBusVoltage();
     inputs.position = Units.rotationsToRadians(motor.getEncoder().getPosition());
@@ -53,26 +50,6 @@ public class SparkMaxMotor implements MotorIO {
   @Override
   public void setVoltage(double volts) {
     motor.setVoltage(volts);
-  }
-
-  @Override
-  public DCMotor getModel() {
-    return model;
-  }
-
-  @Override
-  public double getPosition() {
-    return inputs.position;
-  }
-
-  @Override
-  public double getVelocity() {
-    return inputs.velocity;
-  }
-
-  @Override
-  public double getVoltage() {
-    return inputs.statorVoltage;
   }
 
   @Override
