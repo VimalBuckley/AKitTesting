@@ -3,9 +3,10 @@ package frc.robot.hardware.motor;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.function.Consumer;
@@ -13,23 +14,22 @@ import org.littletonrobotics.junction.Logger;
 
 public class TalonFXMotor implements MotorIO {
   private TalonFX motor;
-  private DCMotorModel model;
+  private DCMotor model;
   private MotorIOInputsAutoLogged inputs;
-  private TorqueCurrentFOC currentRequest;
 
-  public TalonFXMotor(int deviceID, CANBus canbus, Consumer<TalonFX> config, DCMotorModel model) {
+  public TalonFXMotor(int deviceID, CANBus canbus, Consumer<TalonFX> config, DCMotor model) {
     motor = new TalonFX(deviceID, canbus);
     config.accept(motor);
     this.model = model;
-    currentRequest = new TorqueCurrentFOC(0);
+    inputs = new MotorIOInputsAutoLogged();
   }
 
-  public TalonFXMotor(int deviceID, Consumer<TalonFX> config, DCMotorModel model) {
+  public TalonFXMotor(int deviceID, Consumer<TalonFX> config, DCMotor model) {
     this(deviceID, new CANBus(""), config, model);
   }
 
   public TalonFXMotor(
-      int deviceID, CANBus canbus, TalonFXConfiguration config, DCMotorModel model) {
+      int deviceID, CANBus canbus, TalonFXConfiguration config, DCMotor model) {
     this(
         deviceID,
         canbus,
@@ -42,7 +42,7 @@ public class TalonFXMotor implements MotorIO {
         model);
   }
 
-  public TalonFXMotor(int deviceID, TalonFXConfiguration config, DCMotorModel model) {
+  public TalonFXMotor(int deviceID, TalonFXConfiguration config, DCMotor model) {
     this(deviceID, new CANBus(""), config, model);
   }
 
@@ -52,16 +52,7 @@ public class TalonFXMotor implements MotorIO {
   }
 
   @Override
-  public void setCurrent(double amps) {
-    if (motor.getIsProLicensed().getValue()) {
-      motor.setControl(currentRequest.withOutput(amps));
-    } else {
-      setVoltage(model.getVoltage(amps, inputs.velocity, inputs.statorVoltage));
-    }
-  }
-
-  @Override
-  public DCMotorModel getModel() {
+  public DCMotor getModel() {
     return model;
   }
 
@@ -76,8 +67,8 @@ public class TalonFXMotor implements MotorIO {
   }
 
   @Override
-  public double getTorque() {
-    return model.getTorque(inputs.statorCurrent, inputs.velocity);
+  public double getVoltage() {
+    return inputs.statorVoltage;
   }
 
   @Override
@@ -89,7 +80,7 @@ public class TalonFXMotor implements MotorIO {
   public void updateSim(double acceleration, double dt) {
     TalonFXSimState simState = motor.getSimState();
     double vel = acceleration * dt + inputs.velocity;
-    double pos = 0.5 * (vel + inputs.velocity) * dt;
+    double pos = inputs.position + 0.5 * (vel + inputs.velocity) * dt;
     simState.setSupplyVoltage(RobotController.getBatteryVoltage());
     simState.setRawRotorPosition(Units.radiansToRotations(pos));
     simState.setRotorVelocity(Units.radiansToRotations(vel));
@@ -98,10 +89,12 @@ public class TalonFXMotor implements MotorIO {
   @Override
   public void updateInputs(String name) {
     inputs.statorVoltage = motor.getMotorVoltage().getValueAsDouble();
+    inputs.supplyVoltage = motor.getSupplyVoltage().getValueAsDouble();
     inputs.position = Units.rotationsToRadians(motor.getPosition().getValueAsDouble());
     inputs.velocity = Units.rotationsToRadians(motor.getVelocity().getValueAsDouble());
     inputs.statorCurrent = motor.getStatorCurrent().getValueAsDouble();
     inputs.supplyCurrent = motor.getSupplyCurrent().getValueAsDouble();
+    inputs.temperature = motor.getDeviceTemp().getValueAsDouble();
     Logger.processInputs(name, inputs);
   }
 }

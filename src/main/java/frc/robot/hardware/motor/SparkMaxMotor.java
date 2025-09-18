@@ -2,12 +2,13 @@ package frc.robot.hardware.motor;
 
 import com.revrobotics.REVLibError;
 import com.revrobotics.sim.SparkMaxSim;
-import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.function.Consumer;
@@ -15,16 +16,17 @@ import org.littletonrobotics.junction.Logger;
 
 public class SparkMaxMotor implements MotorIO {
   private SparkMax motor;
-  private DCMotorModel model;
+  private DCMotor model;
   private MotorIOInputsAutoLogged inputs;
 
-  public SparkMaxMotor(int deviceID, Consumer<SparkMax> config, DCMotorModel model) {
+  public SparkMaxMotor(int deviceID, Consumer<SparkMax> config, DCMotor model) {
     motor = new SparkMax(deviceID, MotorType.kBrushless);
     config.accept(motor);
     this.model = model;
+    inputs = new MotorIOInputsAutoLogged();
   }
 
-  public SparkMaxMotor(int deviceID, SparkMaxConfig config, DCMotorModel model) {
+  public SparkMaxMotor(int deviceID, SparkMaxConfig config, DCMotor model) {
     this(
         deviceID,
         spark -> {
@@ -39,10 +41,12 @@ public class SparkMaxMotor implements MotorIO {
   @Override
   public void updateInputs(String name) {
     inputs.statorVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
+    inputs.supplyVoltage = motor.getBusVoltage();
     inputs.position = Units.rotationsToRadians(motor.getEncoder().getPosition());
     inputs.velocity = Units.rotationsPerMinuteToRadiansPerSecond(motor.getEncoder().getVelocity());
     inputs.statorCurrent = motor.getOutputCurrent();
     inputs.supplyCurrent = motor.getAppliedOutput() * inputs.statorCurrent;
+    inputs.temperature = motor.getMotorTemperature();
     Logger.processInputs(name, inputs);
   }
 
@@ -52,12 +56,7 @@ public class SparkMaxMotor implements MotorIO {
   }
 
   @Override
-  public void setCurrent(double amps) {
-    motor.getClosedLoopController().setReference(amps, ControlType.kCurrent);
-  }
-
-  @Override
-  public DCMotorModel getModel() {
+  public DCMotor getModel() {
     return model;
   }
 
@@ -72,8 +71,8 @@ public class SparkMaxMotor implements MotorIO {
   }
 
   @Override
-  public double getTorque() {
-    return model.getTorque(inputs.statorCurrent, inputs.velocity);
+  public double getVoltage() {
+    return inputs.statorVoltage;
   }
 
   @Override

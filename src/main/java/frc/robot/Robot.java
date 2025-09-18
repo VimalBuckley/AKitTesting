@@ -13,6 +13,20 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.hardware.IOLayer;
+import frc.robot.hardware.mechanisms.FlywheelMechanism;
+import frc.robot.hardware.motor.TalonFXMotor;
+import frc.robot.utilities.FeedbackController.PIDFeedback;
+import frc.robot.utilities.FeedbackController.ProfiledFeedback;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -27,7 +41,50 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  * project.
  */
 public class Robot extends LoggedRobot {
+  public static ArrayList<Double> supplyCurrents;
+  public static HashMap<String, IOLayer> ios;
+  private FlywheelMechanism flywheel;
+
   public Robot() {
+    setupAdvantageKit();
+    new ProfiledFeedback(5, new Constraints(4, 5));
+    supplyCurrents = new ArrayList<>();
+    ios = new HashMap<>();
+    flywheel =
+        new FlywheelMechanism(
+            "Test Flywheel",
+            new TalonFXMotor(
+                1, new TalonFXConfiguration(), DCMotor.getKrakenX60(1)),
+            1,
+            0.01,
+            new PIDFeedback(0));
+  }
+
+  @Override
+  public void teleopInit() {
+    flywheel.setTargetSpeed(300);
+  }
+
+  /** This function is called periodically during all modes. */
+  @Override
+  public void robotPeriodic() {
+    for (Map.Entry<String, IOLayer> io : ios.entrySet()) {
+      io.getValue().updateInputs(io.getKey());
+    }
+    CommandScheduler.getInstance().run();
+  }
+
+  /** This function is called periodically whilst in simulation. */
+  @Override
+  public void simulationPeriodic() {
+    double[] currents = new double[supplyCurrents.size()];
+    for (int i = 0; i < currents.length; i++) {
+      currents[i] = supplyCurrents.get(i);
+    }
+    RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(currents));
+  }
+
+  public void setupAdvantageKit() {
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -71,48 +128,4 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
   }
-
-  /** This function is called periodically during all modes. */
-  @Override
-  public void robotPeriodic() {}
-
-  /** This function is called once when the robot is disabled. */
-  @Override
-  public void disabledInit() {}
-
-  /** This function is called periodically when disabled. */
-  @Override
-  public void disabledPeriodic() {}
-
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
-  @Override
-  public void autonomousInit() {}
-
-  /** This function is called periodically during autonomous. */
-  @Override
-  public void autonomousPeriodic() {}
-
-  /** This function is called once when teleop is enabled. */
-  @Override
-  public void teleopInit() {}
-
-  /** This function is called periodically during operator control. */
-  @Override
-  public void teleopPeriodic() {}
-
-  /** This function is called once when test mode is enabled. */
-  @Override
-  public void testInit() {}
-
-  /** This function is called periodically during test mode. */
-  @Override
-  public void testPeriodic() {}
-
-  /** This function is called once when the robot is first started up. */
-  @Override
-  public void simulationInit() {}
-
-  /** This function is called periodically whilst in simulation. */
-  @Override
-  public void simulationPeriodic() {}
 }
