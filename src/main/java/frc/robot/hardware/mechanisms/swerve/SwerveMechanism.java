@@ -13,11 +13,8 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.hardware.encoders.EncoderIO;
 import frc.robot.hardware.gyros.GyroIO;
 import frc.robot.hardware.mechanisms.flywheels.FlywheelMechanism;
-import frc.robot.hardware.mechanisms.pivots.PivotMechanism;
-import frc.robot.hardware.mechanisms.pivots.PivotWithAbsEncoderMechanism;
 import frc.robot.hardware.motors.MotorIO;
 import frc.robot.hardware.tagCameras.TagCameraIO;
 import frc.robot.hardware.tagCameras.TagCameraIO.PoseEstimate;
@@ -59,24 +56,25 @@ public class SwerveMechanism extends SubsystemBase {
   }
 
   public static FlywheelMechanism[] makeModuleDrives(
-    MotorIO[] driveMotors,
-    int simsPerLoop,
-    FeedbackController[] controllers,
-    double gearReduction,
-    double wheelRadius,
-    double robotMass
-  ) {
+      MotorIO[] driveMotors,
+      int simsPerLoop,
+      FeedbackController[] controllers,
+      double gearReduction,
+      double wheelRadius,
+      double robotMass) {
     if (!(driveMotors.length == controllers.length)) {
-        throw new RuntimeException("There must be an equal amount of Drive Motors and Feedback Controllers");
+      throw new RuntimeException(
+          "There must be an equal amount of Drive Motors and Feedback Controllers");
     }
     FlywheelMechanism[] drives = new FlywheelMechanism[driveMotors.length];
     for (int i = 0; i < drives.length; i++) {
-        drives[i] = new FlywheelMechanism(
-            driveMotors[i], 
-            simsPerLoop, 
-            gearReduction, 
-            0,
-            12
+      drives[i] =
+          new FlywheelMechanism(
+              driveMotors[i],
+              simsPerLoop,
+              gearReduction,
+              0,
+              12
                   / (driveMotors[i].getModel().freeSpeedRadPerSec
                       / gearReduction
                       * wheelRadius
@@ -89,70 +87,10 @@ public class SwerveMechanism extends SubsystemBase {
                       * 2
                       * Math.PI
                       * gearReduction
-                      * driveMotors[i].getModel().stallTorqueNewtonMeters), 
-            controllers[i]
-        );
+                      * driveMotors[i].getModel().stallTorqueNewtonMeters),
+              controllers[i]);
     }
     return drives;
-  }
-
-  public static SwerveModule[] makeModules(
-      MotorIO[] driveMotors,
-      MotorIO[] angleMotors,
-      int driveSimsPerLoop,
-      int angleSimsPerLoop,
-      EncoderIO[] absoluteEncoders,
-      Translation2d[] moduleLocations,
-      FeedbackController[] driveControllers,
-      FeedbackController[] angleControllers,
-      double driveGearReduction,
-      double angleGearReduction,
-      double wheelRadius,
-      double robotMass,
-      double angleMassMomentOfInertia) {
-    if (!(driveMotors.length == angleMotors.length)
-        && (angleMotors.length == absoluteEncoders.length)
-        && (absoluteEncoders.length == moduleLocations.length)
-        && (moduleLocations.length == driveControllers.length)
-        && (driveControllers.length == angleControllers.length)) {
-      return null;
-    }
-    SwerveModule[] modules = new SwerveModule[driveMotors.length];
-    for (int i = 0; i < modules.length; i++) {
-      FlywheelMechanism drive =
-          new FlywheelMechanism(
-              driveMotors[i],
-              driveSimsPerLoop,
-              driveGearReduction,
-              0,
-              12
-                  / (driveMotors[i].getModel().freeSpeedRadPerSec
-                      / driveGearReduction
-                      * wheelRadius
-                      * 2
-                      * Math.PI),
-              12
-                  * robotMass
-                  * wheelRadius
-                  / (modules.length
-                      * 2
-                      * Math.PI
-                      * driveGearReduction
-                      * driveMotors[i].getModel().stallTorqueNewtonMeters),
-              driveControllers[i]);
-      PivotMechanism angle =
-          new PivotWithAbsEncoderMechanism(
-              angleMotors[i],
-              absoluteEncoders[i],
-              angleSimsPerLoop,
-              angleGearReduction,
-              angleMassMomentOfInertia,
-              0,
-              0,
-              angleControllers[i]);
-      modules[i] = new SwerveModule(drive, angle, moduleLocations[i], wheelRadius);
-    }
-    return modules;
   }
 
   public void setRobotRelativeTargetSpeeds(ChassisSpeeds speeds) {

@@ -22,7 +22,7 @@ public class TalonFXSMotor extends MotorIO {
   }
 
   public TalonFXSMotor(String name, int deviceID, Consumer<TalonFXS> config, DCMotor model) {
-    this(name, deviceID, new CANBus(""), config, model);
+    this(name, deviceID, new CANBus(), config, model);
   }
 
   public TalonFXSMotor(
@@ -41,7 +41,7 @@ public class TalonFXSMotor extends MotorIO {
   }
 
   public TalonFXSMotor(String name, int deviceID, TalonFXSConfiguration config, DCMotor model) {
-    this(name, deviceID, new CANBus(""), config, model);
+    this(name, deviceID, new CANBus(), config, model);
   }
 
   @Override
