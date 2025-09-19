@@ -11,21 +11,21 @@ import edu.wpi.first.wpilibj.RobotController;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
-public class TalonFXSMotor extends MotorIO {
+public class TalonFXSIO extends MotorIO {
   private TalonFXS motor;
 
-  public TalonFXSMotor(
+  public TalonFXSIO(
       String name, int deviceID, CANBus canbus, Consumer<TalonFXS> config, DCMotor model) {
     super(name, model);
     motor = new TalonFXS(deviceID, canbus);
     config.accept(motor);
   }
 
-  public TalonFXSMotor(String name, int deviceID, Consumer<TalonFXS> config, DCMotor model) {
+  public TalonFXSIO(String name, int deviceID, Consumer<TalonFXS> config, DCMotor model) {
     this(name, deviceID, new CANBus(), config, model);
   }
 
-  public TalonFXSMotor(
+  public TalonFXSIO(
       String name, int deviceID, CANBus canbus, TalonFXSConfiguration config, DCMotor model) {
     this(
         name,
@@ -40,7 +40,7 @@ public class TalonFXSMotor extends MotorIO {
         model);
   }
 
-  public TalonFXSMotor(String name, int deviceID, TalonFXSConfiguration config, DCMotor model) {
+  public TalonFXSIO(String name, int deviceID, TalonFXSConfiguration config, DCMotor model) {
     this(name, deviceID, new CANBus(), config, model);
   }
 

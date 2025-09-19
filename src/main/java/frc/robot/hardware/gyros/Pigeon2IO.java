@@ -11,20 +11,20 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.sim.Pigeon2SimState;
 import edu.wpi.first.math.util.Units;
 
-public class Pigeon2Gyro extends GyroIO {
+public class Pigeon2IO extends GyroIO {
   private Pigeon2 gyro;
 
-  public Pigeon2Gyro(String name, int deviceID, CANBus canbus, Consumer<Pigeon2> config) {
+  public Pigeon2IO(String name, int deviceID, CANBus canbus, Consumer<Pigeon2> config) {
     super(name);
     gyro = new Pigeon2(deviceID, canbus);
     config.accept(gyro);
   }
 
-  public Pigeon2Gyro(String name, int deviceID, Consumer<Pigeon2> config) {
+  public Pigeon2IO(String name, int deviceID, Consumer<Pigeon2> config) {
     this(name, deviceID, new CANBus(), config);
   }
 
-  public Pigeon2Gyro(String name, int deviceID, CANBus canbus, Pigeon2Configuration config) {
+  public Pigeon2IO(String name, int deviceID, CANBus canbus, Pigeon2Configuration config) {
     this(name, deviceID, canbus, pigeon -> {
         StatusCode status = StatusCode.StatusCodeNotInitialized;
         for (int i = 0; i < 5 && status != StatusCode.OK; i++) {
@@ -33,7 +33,7 @@ public class Pigeon2Gyro extends GyroIO {
     });
   }
 
-  public Pigeon2Gyro(String name, int deviceID, Pigeon2Configuration config) {
+  public Pigeon2IO(String name, int deviceID, Pigeon2Configuration config) {
     this(name, deviceID, new CANBus(), config);
   }
 

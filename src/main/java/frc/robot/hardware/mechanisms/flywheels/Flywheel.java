@@ -5,7 +5,7 @@ import frc.robot.Robot;
 import frc.robot.hardware.motors.MotorIO;
 import frc.robot.utilities.FeedbackController;
 
-public class FlywheelMechanism extends SubsystemBase {
+public class Flywheel extends SubsystemBase {
   protected MotorIO motor;
   protected double target;
   protected boolean enabled;
@@ -16,7 +16,7 @@ public class FlywheelMechanism extends SubsystemBase {
   protected int simsPerLoop;
   protected FeedbackController feedbackController;
 
-  public FlywheelMechanism(
+  public Flywheel(
       MotorIO motor,
       int simsPerLoop,
       double gearReduction,
@@ -35,7 +35,7 @@ public class FlywheelMechanism extends SubsystemBase {
         feedbackController);
   }
 
-  public FlywheelMechanism(
+  public Flywheel(
       MotorIO motor,
       int simsPerLoop,
       double conversionFactor,

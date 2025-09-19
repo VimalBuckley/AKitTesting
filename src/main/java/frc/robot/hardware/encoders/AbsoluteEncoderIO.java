@@ -3,10 +3,10 @@ package frc.robot.hardware.encoders;
 import frc.robot.hardware.IOLayer;
 import org.littletonrobotics.junction.AutoLog;
 
-public abstract class EncoderIO implements IOLayer {
+public abstract class AbsoluteEncoderIO implements IOLayer {
   protected String name;
   protected EncoderIOInputsAutoLogged inputs;
-  public EncoderIO(String name) {
+  public AbsoluteEncoderIO(String name) {
     this.name = name;
     inputs = new EncoderIOInputsAutoLogged();
     updateInputs();
@@ -20,6 +20,5 @@ public abstract class EncoderIO implements IOLayer {
     return inputs.position;
   }
 
-  public abstract void setPosition(double newValue);
   public abstract void updateSim(double velocity, double dt);
 }

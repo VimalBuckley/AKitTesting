@@ -1,15 +1,15 @@
 package frc.robot.hardware.mechanisms.pivots;
 
-import frc.robot.hardware.encoders.EncoderIO;
+import frc.robot.hardware.encoders.AbsoluteEncoderIO;
 import frc.robot.hardware.motors.MotorIO;
 import frc.robot.utilities.FeedbackController;
 
-public class PivotWithAbsEncoderMechanism extends PivotMechanism {
-  protected EncoderIO absEncoder;
+public class PivotWithAbsEncoder extends Pivot {
+  protected AbsoluteEncoderIO absEncoder;
 
-  public PivotWithAbsEncoderMechanism(
+  public PivotWithAbsEncoder(
       MotorIO motor,
-      EncoderIO absEncoder,
+      AbsoluteEncoderIO absEncoder,
       int simsPerLoop,
       double gearReduction,
       double massMomentOfInertia,
@@ -27,9 +27,9 @@ public class PivotWithAbsEncoderMechanism extends PivotMechanism {
     this.absEncoder = absEncoder;
   }
 
-  public PivotWithAbsEncoderMechanism(
+  public PivotWithAbsEncoder(
       MotorIO motor,
-      EncoderIO absEncoder,
+      AbsoluteEncoderIO absEncoder,
       int simsPerLoop,
       double conversionFactor,
       double kG,

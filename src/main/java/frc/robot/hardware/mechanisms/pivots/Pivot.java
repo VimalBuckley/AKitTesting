@@ -5,7 +5,7 @@ import frc.robot.Robot;
 import frc.robot.hardware.motors.MotorIO;
 import frc.robot.utilities.FeedbackController;
 
-public class PivotMechanism extends SubsystemBase {
+public class Pivot extends SubsystemBase {
   protected MotorIO motor;
   protected double target;
   protected boolean enabled;
@@ -17,7 +17,7 @@ public class PivotMechanism extends SubsystemBase {
   protected int simsPerLoop;
   protected FeedbackController feedbackController;
 
-  public PivotMechanism(
+  public Pivot(
       MotorIO motor,
       int simsPerLoop,
       double gearReduction,
@@ -44,7 +44,7 @@ public class PivotMechanism extends SubsystemBase {
         feedbackController);
   }
 
-  public PivotMechanism(
+  public Pivot(
       MotorIO motor,
       int simsPerLoop,
       double conversionFactor,

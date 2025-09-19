@@ -19,9 +19,9 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.hardware.mechanisms.flywheels.FlywheelMechanism;
+import frc.robot.hardware.mechanisms.flywheels.Flywheel;
 import frc.robot.hardware.motors.MotorIO;
-import frc.robot.hardware.motors.TalonFXMotor;
+import frc.robot.hardware.motors.TalonFXIO;
 import frc.robot.utilities.FeedbackController.PIDFeedback;
 import frc.robot.utilities.FeedbackController.ProfiledFeedback;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   public static ArrayList<Double> supplyCurrents;
   public static ArrayList<MotorIO> ios;
-  private FlywheelMechanism flywheel;
+  private Flywheel flywheel;
 
   public Robot() {
     setupAdvantageKit();
@@ -49,8 +49,8 @@ public class Robot extends LoggedRobot {
     supplyCurrents = new ArrayList<>();
     ios = new ArrayList<>();
     flywheel =
-        new FlywheelMechanism(
-            new TalonFXMotor(
+        new Flywheel(
+            new TalonFXIO(
                 "Test Flywheel/Spin Motor", 1, new TalonFXConfiguration(), DCMotor.getKrakenX60(1)),
             1,
             1,

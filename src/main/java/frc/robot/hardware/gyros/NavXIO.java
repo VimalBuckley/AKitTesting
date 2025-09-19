@@ -9,16 +9,16 @@ import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
-public class NavXGyro extends GyroIO {
+public class NavXIO extends GyroIO {
   private AHRS gyro;
   private double simAngle;
   private double simVelocity;
 
-  public NavXGyro(String name, NavXComType connectionType) {
+  public NavXIO(String name, NavXComType connectionType) {
     this(name, connectionType, ahrs -> {});
   }
 
-  public NavXGyro(String name, NavXComType connectionType, Consumer<AHRS> config) {
+  public NavXIO(String name, NavXComType connectionType, Consumer<AHRS> config) {
     super(name);
     gyro = new AHRS(connectionType);
     config.accept(gyro);

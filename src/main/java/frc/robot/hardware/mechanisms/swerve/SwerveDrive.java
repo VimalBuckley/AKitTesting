@@ -1,5 +1,10 @@
 package frc.robot.hardware.mechanisms.swerve;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -11,16 +16,19 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.hardware.gyros.GyroIO;
-import frc.robot.hardware.mechanisms.flywheels.FlywheelMechanism;
+import frc.robot.hardware.mechanisms.flywheels.Flywheel;
 import frc.robot.hardware.motors.MotorIO;
 import frc.robot.hardware.tagCameras.TagCameraIO;
 import frc.robot.hardware.tagCameras.TagCameraIO.PoseEstimate;
 import frc.robot.utilities.FeedbackController;
 
-public class SwerveMechanism extends SubsystemBase {
+public class SwerveDrive extends SubsystemBase {
   private SwerveModule[] modules;
   private GyroIO gyro;
   private TagCameraIO[] tagCameras;
@@ -30,14 +38,18 @@ public class SwerveMechanism extends SubsystemBase {
   private ChassisSpeeds maxRobotSpeeds;
   private double maxModuleSpeed;
 
-  public SwerveMechanism(
+  public SwerveDrive(
       SwerveModule[] modules,
       GyroIO gyro,
       TagCameraIO[] tagCameras,
       ChassisSpeeds maxRobotSpeeds,
       double maxModuleSpeed,
       Matrix<N3, N1> stateStandardDeviations,
-      Matrix<N3, N1> visionStandardDeviations) {
+      Matrix<N3, N1> visionStandardDeviations,
+      PIDConstants autoTranslationConstants,
+      PIDConstants autoRotationConstants,
+      Subsystem driveSubsystem
+    ) {
     this.modules = modules;
     this.gyro = gyro;
     this.tagCameras = tagCameras;
@@ -53,9 +65,28 @@ public class SwerveMechanism extends SubsystemBase {
             new Pose2d(),
             stateStandardDeviations,
             visionStandardDeviations);
+    RobotConfig config;
+    try {
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      config = null; // TODO fix
+    }
+    AutoBuilder.configure(
+      this::getPose, 
+      this::setPose, 
+      this::getSpeeds, 
+      this::setRobotRelativeTargetSpeeds, 
+      new PPHolonomicDriveController(autoTranslationConstants, autoRotationConstants), 
+      config, 
+      () -> {
+          Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+          return alliance == Alliance.Red;
+      }, 
+      driveSubsystem);
   }
 
-  public static FlywheelMechanism[] makeModuleDrives(
+  public static Flywheel[] makeModuleDrives(
       MotorIO[] driveMotors,
       int simsPerLoop,
       FeedbackController[] controllers,
@@ -66,10 +97,10 @@ public class SwerveMechanism extends SubsystemBase {
       throw new RuntimeException(
           "There must be an equal amount of Drive Motors and Feedback Controllers");
     }
-    FlywheelMechanism[] drives = new FlywheelMechanism[driveMotors.length];
+    Flywheel[] drives = new Flywheel[driveMotors.length];
     for (int i = 0; i < drives.length; i++) {
       drives[i] =
-          new FlywheelMechanism(
+          new Flywheel(
               driveMotors[i],
               simsPerLoop,
               gearReduction,

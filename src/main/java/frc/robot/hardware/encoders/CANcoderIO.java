@@ -2,6 +2,8 @@ package frc.robot.hardware.encoders;
 
 import java.util.function.Consumer;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -9,23 +11,23 @@ import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.math.util.Units;
 
-public class CANcoderEncoder extends EncoderIO {
+public class CANcoderIO extends AbsoluteEncoderIO {
     private CANcoder encoder;
-    public CANcoderEncoder(String name, int deviceID, Consumer<CANcoder> config) {
+    public CANcoderIO(String name, int deviceID, Consumer<CANcoder> config) {
         this(name, deviceID, new CANBus(), config);
     }
 
-    public CANcoderEncoder(String name, int deviceID, CANBus canbus, Consumer<CANcoder> config) {
+    public CANcoderIO(String name, int deviceID, CANBus canbus, Consumer<CANcoder> config) {
         super(name);
         encoder = new CANcoder(deviceID, canbus);
         config.accept(encoder);
     }
 
-    public CANcoderEncoder(String name, int deviceID, CANcoderConfiguration config) {
+    public CANcoderIO(String name, int deviceID, CANcoderConfiguration config) {
         this(name, deviceID, new CANBus(), config);
     }
 
-    public CANcoderEncoder(String name, int deviceID, CANBus canbus, CANcoderConfiguration config) {
+    public CANcoderIO(String name, int deviceID, CANBus canbus, CANcoderConfiguration config) {
         this(name, deviceID, canbus, CANcoder -> {
             StatusCode status = StatusCode.StatusCodeNotInitialized;
             for (int i = 0; i < 5 && status != StatusCode.OK; i++) {
@@ -36,12 +38,8 @@ public class CANcoderEncoder extends EncoderIO {
 
     @Override
     public void updateInputs() {
-        inputs.position = Units.rotationsToRadians(encoder.getPosition().getValueAsDouble());
-    }
-
-    @Override
-    public void setPosition(double newValue) {
-        encoder.setPosition(Units.radiansToRotations(newValue));
+        inputs.position = Units.rotationsToRadians(encoder.getAbsolutePosition().getValueAsDouble());
+        Logger.processInputs(name, inputs);
     }
 
     @Override

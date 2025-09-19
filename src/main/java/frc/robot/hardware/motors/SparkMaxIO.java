@@ -13,16 +13,16 @@ import edu.wpi.first.wpilibj.RobotController;
 import java.util.function.Consumer;
 import org.littletonrobotics.junction.Logger;
 
-public class SparkMaxMotor extends MotorIO {
+public class SparkMaxIO extends MotorIO {
   private SparkMax motor;
 
-  public SparkMaxMotor(String name, int deviceID, Consumer<SparkMax> config, DCMotor model) {
+  public SparkMaxIO(String name, int deviceID, Consumer<SparkMax> config, DCMotor model) {
     super(name, model);
     motor = new SparkMax(deviceID, MotorType.kBrushless);
     config.accept(motor);
   }
 
-  public SparkMaxMotor(String name, int deviceID, SparkMaxConfig config, DCMotor model) {
+  public SparkMaxIO(String name, int deviceID, SparkMaxConfig config, DCMotor model) {
     this(
         name,
         deviceID,
