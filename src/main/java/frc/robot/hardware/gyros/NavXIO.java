@@ -1,31 +1,29 @@
 package frc.robot.hardware.gyros;
 
-import java.util.function.Consumer;
-
-import org.littletonrobotics.junction.Logger;
-
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
+import java.util.function.Consumer;
 
 public class NavXIO extends GyroIO {
   private AHRS gyro;
   private double simAngle;
   private double simVelocity;
 
-  public NavXIO(String name, NavXComType connectionType) {
-    this(name, connectionType, ahrs -> {});
+  public NavXIO(NavXComType connectionType) {
+    this(connectionType, ahrs -> {});
   }
 
-  public NavXIO(String name, NavXComType connectionType, Consumer<AHRS> config) {
-    super(name);
+  public NavXIO(NavXComType connectionType, Consumer<AHRS> config) {
+    super();
     gyro = new AHRS(connectionType);
     config.accept(gyro);
+    updateInputs();
   }
 
   @Override
-  public void updateInputs() {
+  public void updateInputs(GyroIOInputs inputs) {
     if (RobotBase.isReal()) {
       inputs.angle = Units.degreesToRadians(-gyro.getAngle());
       inputs.velocity = Units.degreesToRadians(-gyro.getRate());
@@ -35,12 +33,11 @@ public class NavXIO extends GyroIO {
       inputs.velocity = simVelocity;
       inputs.isConnected = true;
     }
-    Logger.processInputs(name, inputs);
   }
 
   @Override
-  public void updateSim(double velocity, double dt) {
-    simAngle += 0.5 * (inputs.velocity + velocity) * dt;
+  public void updateSim(double velocity, double dt, GyroIOInputs inputs) {
+    simAngle = inputs.angle + 0.5 * (inputs.velocity + velocity) * dt;
     simVelocity = velocity;
   }
 }

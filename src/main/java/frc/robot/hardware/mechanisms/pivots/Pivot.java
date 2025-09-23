@@ -1,11 +1,12 @@
 package frc.robot.hardware.mechanisms.pivots;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 import frc.robot.hardware.motors.MotorIO;
+import frc.robot.hardware.motors.MotorIO.MotorIOInputs;
 import frc.robot.utilities.FeedbackController;
+import frc.robot.utilities.Loggable;
 
-public class Pivot extends SubsystemBase {
+public class Pivot extends SubsystemBase implements Loggable {
   protected MotorIO motor;
   protected double target;
   protected boolean enabled;
@@ -54,7 +55,6 @@ public class Pivot extends SubsystemBase {
       double kA,
       FeedbackController feedbackController) {
     this.motor = motor;
-    Robot.ios.add(motor);
     this.simsPerLoop = simsPerLoop;
     this.conversionFactor = conversionFactor;
     this.kG = kG;
@@ -108,14 +108,23 @@ public class Pivot extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
+    MotorIOInputs inputs = new MotorIOInputs();
     for (int i = 0; i < simsPerLoop; i++) {
+      motor.updateInputs(inputs);
       double acceleration =
           (motor.getVoltage()
-                  - kG * Math.cos(getPosition())
-                  - kS * Math.signum(getVelocity())
-                  - kV * getVelocity())
+                  - kG * Math.cos(inputs.position / conversionFactor)
+                  - kS * Math.signum(inputs.velocity)
+                  - kV * inputs.velocity / conversionFactor)
               / kA;
-      motor.updateSim(acceleration, 0.02 / simsPerLoop);
+      double velocity = inputs.velocity / conversionFactor + 0.02 / simsPerLoop * acceleration;
+      velocity *= conversionFactor;
+      motor.updateSim(velocity, 0.02 / simsPerLoop, inputs);
     }
+  }
+
+  @Override
+  public void log(String name) {
+    motor.log(name, "Motor");
   }
 }

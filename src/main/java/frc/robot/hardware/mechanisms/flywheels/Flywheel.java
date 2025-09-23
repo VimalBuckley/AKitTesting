@@ -1,11 +1,12 @@
 package frc.robot.hardware.mechanisms.flywheels;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 import frc.robot.hardware.motors.MotorIO;
+import frc.robot.hardware.motors.MotorIO.MotorIOInputs;
 import frc.robot.utilities.FeedbackController;
+import frc.robot.utilities.Loggable;
 
-public class Flywheel extends SubsystemBase {
+public class Flywheel extends SubsystemBase implements Loggable {
   protected MotorIO motor;
   protected double target;
   protected boolean enabled;
@@ -44,7 +45,6 @@ public class Flywheel extends SubsystemBase {
       double kA,
       FeedbackController feedbackController) {
     this.motor = motor;
-    Robot.ios.add(motor);
     this.simsPerLoop = simsPerLoop;
     this.conversionFactor = conversionFactor;
     this.kS = kS;
@@ -97,10 +97,22 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
+    MotorIOInputs inputs = new MotorIOInputs();
     for (int i = 0; i < simsPerLoop; i++) {
+      motor.updateInputs(inputs);
       double acceleration =
-          (motor.getVoltage() - kV * getVelocity() - kS * Math.signum(getVelocity())) / kA;
-      motor.updateSim(acceleration, 0.02 / simsPerLoop);
+          (inputs.statorVoltage
+                  - kV * inputs.velocity / conversionFactor
+                  - kS * Math.signum(inputs.velocity))
+              / kA;
+      double velocity = inputs.velocity / conversionFactor + acceleration * 0.02 / simsPerLoop;
+      velocity *= conversionFactor;
+      motor.updateSim(velocity, 0.02 / simsPerLoop, inputs);
     }
+  }
+
+  @Override
+  public void log(String name) {
+    motor.log(name, "Motor");
   }
 }

@@ -1,16 +1,17 @@
 package frc.robot.hardware.gyros;
 
+import frc.robot.Robot;
 import frc.robot.hardware.IOLayer;
+import frc.robot.utilities.Loggable;
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
-public abstract class GyroIO implements IOLayer {
-  protected String name;
-  protected GyroIOInputsAutoLogged inputs;
+public abstract class GyroIO implements IOLayer, Loggable {
+  private GyroIOInputsAutoLogged inputs;
 
-  public GyroIO(String name) {
-    this.name = name;
+  public GyroIO() {
     inputs = new GyroIOInputsAutoLogged();
-    updateInputs();
+    Robot.ios.add(this);
   }
 
   @AutoLog
@@ -28,5 +29,17 @@ public abstract class GyroIO implements IOLayer {
     return inputs.velocity;
   }
 
-  public abstract void updateSim(double velocity, double dt);
+  @Override
+  public void updateInputs() {
+    updateInputs(inputs);
+  }
+
+  public abstract void updateInputs(GyroIOInputs inputs);
+
+  public abstract void updateSim(double velocity, double dt, GyroIOInputs inputs);
+
+  @Override
+  public void log(String name) {
+    Logger.processInputs(name, inputs);
+  }
 }

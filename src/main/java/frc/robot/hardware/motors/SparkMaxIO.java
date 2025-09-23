@@ -11,20 +11,20 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.function.Consumer;
-import org.littletonrobotics.junction.Logger;
 
 public class SparkMaxIO extends MotorIO {
   private SparkMax motor;
+  private SparkMaxSim sim;
 
-  public SparkMaxIO(String name, int deviceID, Consumer<SparkMax> config, DCMotor model) {
-    super(name, model);
+  public SparkMaxIO(int deviceID, Consumer<SparkMax> config, DCMotor model) {
+    super(model);
     motor = new SparkMax(deviceID, MotorType.kBrushless);
     config.accept(motor);
+    sim = new SparkMaxSim(motor, model);
   }
 
-  public SparkMaxIO(String name, int deviceID, SparkMaxConfig config, DCMotor model) {
+  public SparkMaxIO(int deviceID, SparkMaxConfig config, DCMotor model) {
     this(
-        name,
         deviceID,
         spark -> {
           REVLibError status = REVLibError.kUnknown;
@@ -33,18 +33,6 @@ public class SparkMaxIO extends MotorIO {
           }
         },
         model);
-  }
-
-  @Override
-  public void updateInputs() {
-    inputs.statorVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
-    inputs.supplyVoltage = motor.getBusVoltage();
-    inputs.position = Units.rotationsToRadians(motor.getEncoder().getPosition());
-    inputs.velocity = Units.rotationsPerMinuteToRadiansPerSecond(motor.getEncoder().getVelocity());
-    inputs.statorCurrent = motor.getOutputCurrent();
-    inputs.supplyCurrent = motor.getAppliedOutput() * inputs.statorCurrent;
-    inputs.temperature = motor.getMotorTemperature();
-    Logger.processInputs(name, inputs);
   }
 
   @Override
@@ -58,10 +46,21 @@ public class SparkMaxIO extends MotorIO {
   }
 
   @Override
-  public void updateSim(double acceleration, double dt) {
-    SparkMaxSim sim = new SparkMaxSim(motor, model);
-    double vel = inputs.velocity + acceleration * dt;
+  public void updateSim(double velocity, double dt, MotorIOInputs inputs) {
     sim.iterate(
-        Units.radiansPerSecondToRotationsPerMinute(vel), RobotController.getBatteryVoltage(), dt);
+        Units.radiansPerSecondToRotationsPerMinute(velocity),
+        RobotController.getBatteryVoltage(),
+        dt);
+  }
+
+  @Override
+  public void updateInputs(MotorIOInputs inputs) {
+    inputs.statorVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
+    inputs.supplyVoltage = motor.getBusVoltage();
+    inputs.position = Units.rotationsToRadians(motor.getEncoder().getPosition());
+    inputs.velocity = Units.rotationsPerMinuteToRadiansPerSecond(motor.getEncoder().getVelocity());
+    inputs.statorCurrent = motor.getOutputCurrent();
+    inputs.supplyCurrent = motor.getAppliedOutput() * inputs.statorCurrent;
+    inputs.temperature = motor.getMotorTemperature();
   }
 }

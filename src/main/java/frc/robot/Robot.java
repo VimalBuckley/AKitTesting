@@ -13,21 +13,20 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.hardware.mechanisms.flywheels.Flywheel;
-import frc.robot.hardware.motors.MotorIO;
-import frc.robot.hardware.motors.TalonFXIO;
-import frc.robot.utilities.FeedbackController.PIDFeedback;
-import frc.robot.utilities.FeedbackController.ProfiledFeedback;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import frc.robot.hardware.IOLayer;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
 import java.util.ArrayList;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
@@ -40,35 +39,24 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
  */
 public class Robot extends LoggedRobot {
   public static ArrayList<Double> supplyCurrents;
-  public static ArrayList<MotorIO> ios;
-  private Flywheel flywheel;
+  public static ArrayList<IOLayer> ios;
+  private SwerveSubsystem swerve;
 
   public Robot() {
-    setupAdvantageKit();
-    new ProfiledFeedback(5, new Constraints(4, 5));
     supplyCurrents = new ArrayList<>();
     ios = new ArrayList<>();
-    flywheel =
-        new Flywheel(
-            new TalonFXIO(
-                "Test Flywheel/Spin Motor", 1, new TalonFXConfiguration(), DCMotor.getKrakenX60(1)),
-            1,
-            1,
-            0.01,
-            new PIDFeedback(0));
-  }
-
-  @Override
-  public void teleopInit() {
-    flywheel.setTargetSpeed(300);
+    swerve = new SwerveSubsystem();
+    setupAdvantageKit();
+    setupAuto();
   }
 
   /** This function is called periodically during all modes. */
   @Override
   public void robotPeriodic() {
-    for (MotorIO io : ios) {
+    for (IOLayer io : ios) {
       io.updateInputs();
     }
+    swerve.log("Swerve");
     CommandScheduler.getInstance().run();
   }
 
@@ -79,10 +67,17 @@ public class Robot extends LoggedRobot {
     for (int i = 0; i < currents.length; i++) {
       currents[i] = supplyCurrents.get(i);
     }
+    supplyCurrents.clear();
     RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(currents));
   }
 
-  public void setupAdvantageKit() {
+  private void setupAuto() {
+    LoggedDashboardChooser<Command> autoChooser =
+        new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
+    RobotModeTriggers.autonomous().whileTrue(Commands.deferredProxy(autoChooser::get));
+  }
+
+  private void setupAdvantageKit() {
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);

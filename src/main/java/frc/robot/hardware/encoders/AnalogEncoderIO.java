@@ -1,37 +1,33 @@
 package frc.robot.hardware.encoders;
 
-import java.util.function.Consumer;
-
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.RobotBase;
+import java.util.function.Consumer;
 
 public class AnalogEncoderIO extends AbsoluteEncoderIO {
-    private AnalogEncoder encoder;
-    private double offset;
-    private double simPosition;
+  private AnalogEncoder encoder;
+  private double offset;
+  private double simPosition;
 
-    public AnalogEncoderIO(String name, int channel, double offset, Consumer<AnalogEncoder> config) {
-        super(name);
-        encoder = new AnalogEncoder(channel);
-        config.accept(encoder);
-        this.offset = offset;
-    }
+  public AnalogEncoderIO(int channel, double offset, Consumer<AnalogEncoder> config) {
+    super();
+    encoder = new AnalogEncoder(channel);
+    config.accept(encoder);
+    this.offset = offset;
+    updateInputs();
+  }
 
-    @Override
-    public void updateInputs() {
-        if (RobotBase.isReal()) {
-            inputs.position = encoder.get() - offset;
-        } else {
-            inputs.position = simPosition;
-        }
-        Logger.processInputs(name, inputs);
-    }
+  @Override
+  public void updateSim(double velocity, double dt, AbsoluteEncoderIOInputs inputs) {
+    simPosition = inputs.position + velocity * dt;
+  }
 
-    @Override
-    public void updateSim(double velocity, double dt) {
-        simPosition += velocity * dt;
+  @Override
+  public void updateInputs(AbsoluteEncoderIOInputs inputs) {
+    if (RobotBase.isReal()) {
+      inputs.position = encoder.get() - offset;
+    } else {
+      inputs.position = simPosition;
     }
-    
+  }
 }

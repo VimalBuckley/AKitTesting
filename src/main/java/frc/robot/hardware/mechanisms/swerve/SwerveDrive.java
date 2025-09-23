@@ -4,7 +4,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -27,8 +26,10 @@ import frc.robot.hardware.motors.MotorIO;
 import frc.robot.hardware.tagCameras.TagCameraIO;
 import frc.robot.hardware.tagCameras.TagCameraIO.PoseEstimate;
 import frc.robot.utilities.FeedbackController;
+import frc.robot.utilities.Loggable;
+import org.littletonrobotics.junction.Logger;
 
-public class SwerveDrive extends SubsystemBase {
+public class SwerveDrive extends SubsystemBase implements Loggable {
   private SwerveModule[] modules;
   private GyroIO gyro;
   private TagCameraIO[] tagCameras;
@@ -48,8 +49,7 @@ public class SwerveDrive extends SubsystemBase {
       Matrix<N3, N1> visionStandardDeviations,
       PIDConstants autoTranslationConstants,
       PIDConstants autoRotationConstants,
-      Subsystem driveSubsystem
-    ) {
+      Subsystem driveSubsystem) {
     this.modules = modules;
     this.gyro = gyro;
     this.tagCameras = tagCameras;
@@ -73,17 +73,17 @@ public class SwerveDrive extends SubsystemBase {
       config = null; // TODO fix
     }
     AutoBuilder.configure(
-      this::getPose, 
-      this::setPose, 
-      this::getSpeeds, 
-      this::setRobotRelativeTargetSpeeds, 
-      new PPHolonomicDriveController(autoTranslationConstants, autoRotationConstants), 
-      config, 
-      () -> {
+        this::getPose,
+        this::setPose,
+        this::getSpeeds,
+        this::setRobotRelativeTargetSpeeds,
+        new PPHolonomicDriveController(autoTranslationConstants, autoRotationConstants),
+        config,
+        () -> {
           Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
           return alliance == Alliance.Red;
-      }, 
-      driveSubsystem);
+        },
+        driveSubsystem);
   }
 
   public static Flywheel[] makeModuleDrives(
@@ -215,6 +215,20 @@ public class SwerveDrive extends SubsystemBase {
     for (int i = 0; i < modules.length; i++) {
       modules[i].setTargetState(targetStates[i]);
       modules[i].periodic();
+    }
+    Logger.recordOutput("Robot Pose", getPose());
+    Logger.recordOutput("Robot Module States", getModuleStates());
+    Logger.recordOutput("Robot Target Module States", targetStates);
+  }
+
+  @Override
+  public void log(String name) {
+    for (int i = 0; i < modules.length; i++) {
+      modules[i].log(name, "Module " + i);
+    }
+    gyro.log(name, "Gyro");
+    for (int i = 0; i < tagCameras.length; i++) {
+      tagCameras[i].log(name, "Tag Camera " + i);
     }
   }
 }
