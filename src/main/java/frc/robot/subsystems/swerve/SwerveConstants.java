@@ -34,7 +34,7 @@ public class SwerveConstants {
           0.25348,
           0.491242554389,
           0.0619252784977,
-          new AnalogEncoderIO(SwerveWiring.FRONT_LEFT_ENCODER_ID, 0.642, encoder -> {}));
+          new AnalogEncoderIO(SwerveWiring.FRONT_LEFT_ENCODER_ID, 4.033805, encoder -> {}));
 
   public static final SwerveModule FRONT_RIGHT_MODULE =
       SwerveModule.fromMeasuredValues(
@@ -58,7 +58,7 @@ public class SwerveConstants {
           0.27701,
           0.515003114153,
           0.0627675264566,
-          new AnalogEncoderIO(SwerveWiring.FRONT_RIGHT_ENCODER_ID, 0.668, encoder -> {}));
+          new AnalogEncoderIO(SwerveWiring.FRONT_RIGHT_ENCODER_ID, 4.1971678, encoder -> {}));
 
   public static final SwerveModule BACK_LEFT_MODULE =
       SwerveModule.fromMeasuredValues(
@@ -80,7 +80,7 @@ public class SwerveConstants {
           0.25886,
           0.520658207591,
           0.0725479160195,
-          new AnalogEncoderIO(SwerveWiring.BACK_LEFT_ENCODER_ID, 0.022, encoder -> {}));
+          new AnalogEncoderIO(SwerveWiring.BACK_LEFT_ENCODER_ID, 0.13823008, encoder -> {}));
 
   public static final SwerveModule BACK_RIGHT_MODULE =
       SwerveModule.fromMeasuredValues(
@@ -104,5 +104,5 @@ public class SwerveConstants {
           0.25348,
           0.528765560392,
           0.0818699393462,
-          new AnalogEncoderIO(SwerveWiring.BACK_RIGHT_ENCODER_ID, 0.879, encoder -> {}));
+          new AnalogEncoderIO(SwerveWiring.BACK_RIGHT_ENCODER_ID, 5.5229199, encoder -> {}));
 }

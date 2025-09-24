@@ -6,15 +6,28 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import java.util.function.Consumer;
 
+/**
+ * A class that wraps a {@link AHRS} in an IO layer through {@link GyroIO}
+ */
 public class NavXIO extends GyroIO {
   private AHRS gyro;
   private double simAngle;
   private double simVelocity;
 
+  /**
+   * Creates a new {@link AHRS}
+   * @param connectionType How the NavX is connected to the robot
+   */
   public NavXIO(NavXComType connectionType) {
     this(connectionType, ahrs -> {});
   }
 
+  /**
+   * Creates a new {@link AHRS}
+   * @param connectionType How the NavX is connected to the robot
+   * @param config A method that takes in a {@link AHRS}, and configures it as
+   * the caller sees fit
+   */
   public NavXIO(NavXComType connectionType, Consumer<AHRS> config) {
     super();
     gyro = new AHRS(connectionType);

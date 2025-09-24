@@ -7,23 +7,43 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import edu.wpi.first.math.util.Units;
 import java.util.function.Consumer;
 
+/**
+ * A class that wraps a {@link CANcoder} in an IO layer through {@link AbsoluteEncoderIO}
+ */
 public class CANcoderIO extends AbsoluteEncoderIO {
   private CANcoder encoder;
-
-  public CANcoderIO(int deviceID, Consumer<CANcoder> config) {
-    this(deviceID, new CANBus(), config);
-  }
-
+  
+  /**
+   * Creates a new {@link CANcoder}
+   * @param deviceID The CAN ID of the {@link CANcoder}
+   * @param canbus The canbus encoder is connected to
+   * @param config A method that takes in a {@link CANcoder}, and configures it as
+   * the caller sees fit. Most of the config should also apply during simulation
+   */
   public CANcoderIO(int deviceID, CANBus canbus, Consumer<CANcoder> config) {
     super();
     encoder = new CANcoder(deviceID, canbus);
     config.accept(encoder);
   }
 
-  public CANcoderIO(int deviceID, CANcoderConfiguration config) {
+  /**
+   * Creates a new {@link CANcoder}
+   * @param deviceID The CAN ID of the {@link CANcoder}
+   * @param config A method that takes in a {@link CANcoder}, and configures it as
+   * the caller sees fit. Most of the config should also apply during simulation
+   */
+  public CANcoderIO(int deviceID, Consumer<CANcoder> config) {
     this(deviceID, new CANBus(), config);
   }
 
+  /**
+   * Creates a new {@link CANcoder}
+   * @param deviceID The CAN ID of the {@link CANcoder}
+   * @param canbus The canbus encoder is connected to
+   * @param config A {@link CANcoderConfiguration} that is applied to this {@link CANcoder}.
+   * Configuration is attempted 4 times before giving up. Most of the config should also 
+   * apply during simulation
+   */
   public CANcoderIO(int deviceID, CANBus canbus, CANcoderConfiguration config) {
     this(
         deviceID,
@@ -34,6 +54,17 @@ public class CANcoderIO extends AbsoluteEncoderIO {
             CANcoder.getConfigurator().apply(config);
           }
         });
+  }
+
+  /**
+   * Creates a new {@link CANcoder}
+   * @param deviceID The CAN ID of the {@link CANcoder}
+   * @param config A {@link CANcoderConfiguration} that is applied to this {@link CANcoder}.
+   * Configuration is attempted 4 times before giving up. Most of the config should also 
+   * apply during simulation
+   */
+  public CANcoderIO(int deviceID, CANcoderConfiguration config) {
+    this(deviceID, new CANBus(), config);
   }
 
   @Override

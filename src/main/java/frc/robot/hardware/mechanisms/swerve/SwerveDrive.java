@@ -21,11 +21,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.hardware.gyros.GyroIO;
-import frc.robot.hardware.mechanisms.flywheels.Flywheel;
-import frc.robot.hardware.motors.MotorIO;
 import frc.robot.hardware.tagCameras.TagCameraIO;
 import frc.robot.hardware.tagCameras.TagCameraIO.PoseEstimate;
-import frc.robot.utilities.FeedbackController;
 import frc.robot.utilities.Loggable;
 import org.littletonrobotics.junction.Logger;
 
@@ -84,44 +81,6 @@ public class SwerveDrive extends SubsystemBase implements Loggable {
           return alliance == Alliance.Red;
         },
         driveSubsystem);
-  }
-
-  public static Flywheel[] makeModuleDrives(
-      MotorIO[] driveMotors,
-      int simsPerLoop,
-      FeedbackController[] controllers,
-      double gearReduction,
-      double wheelRadius,
-      double robotMass) {
-    if (!(driveMotors.length == controllers.length)) {
-      throw new RuntimeException(
-          "There must be an equal amount of Drive Motors and Feedback Controllers");
-    }
-    Flywheel[] drives = new Flywheel[driveMotors.length];
-    for (int i = 0; i < drives.length; i++) {
-      drives[i] =
-          new Flywheel(
-              driveMotors[i],
-              simsPerLoop,
-              gearReduction,
-              0,
-              12
-                  / (driveMotors[i].getModel().freeSpeedRadPerSec
-                      / gearReduction
-                      * wheelRadius
-                      * 2
-                      * Math.PI),
-              12
-                  * robotMass
-                  * wheelRadius
-                  / (drives.length
-                      * 2
-                      * Math.PI
-                      * gearReduction
-                      * driveMotors[i].getModel().stallTorqueNewtonMeters),
-              controllers[i]);
-    }
-    return drives;
   }
 
   public void setRobotRelativeTargetSpeeds(ChassisSpeeds speeds) {
