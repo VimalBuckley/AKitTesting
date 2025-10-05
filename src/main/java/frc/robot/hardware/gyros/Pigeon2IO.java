@@ -8,18 +8,17 @@ import com.ctre.phoenix6.sim.Pigeon2SimState;
 import edu.wpi.first.math.util.Units;
 import java.util.function.Consumer;
 
-/**
- * A class that wraps a {@link Pigeon2} in an IO layer through {@link GyroIO}
- */
+/** A class that wraps a {@link Pigeon2} in an IO layer through {@link GyroIO} */
 public class Pigeon2IO extends GyroIO {
   private Pigeon2 gyro;
 
   /**
    * Creates a new {@link Pigeon2}
+   *
    * @param deviceID The CAN ID of the {@link Pigeon2}
    * @param canbus The canbus this motor is connected to
-   * @param config A method that takes in a {@link Pigeon2}, and configures it as
-   * the caller sees fit. Most of the config should also apply during simulation
+   * @param config A method that takes in a {@link Pigeon2}, and configures it as the caller sees
+   *     fit. Most of the config should also apply during simulation
    */
   public Pigeon2IO(int deviceID, CANBus canbus, Consumer<Pigeon2> config) {
     super();
@@ -30,9 +29,10 @@ public class Pigeon2IO extends GyroIO {
 
   /**
    * Creates a new {@link Pigeon2}
+   *
    * @param deviceID The CAN ID of the {@link Pigeon2}
-   * @param config A method that takes in a {@link Pigeon2}, and configures it as
-   * the caller sees fit. Most of the config should also apply during simulation
+   * @param config A method that takes in a {@link Pigeon2}, and configures it as the caller sees
+   *     fit. Most of the config should also apply during simulation
    */
   public Pigeon2IO(int deviceID, Consumer<Pigeon2> config) {
     this(deviceID, new CANBus(), config);
@@ -40,11 +40,12 @@ public class Pigeon2IO extends GyroIO {
 
   /**
    * Creates a new {@link Pigeon2}
+   *
    * @param deviceID The CAN ID of the {@link Pigeon2}
    * @param canbus The canbus this motor is connected to
    * @param config A {@link Pigeon2Configuration} that is applied to this {@link Pigeon2}.
-   * Configuration is attempted 5 times before giving up. most of the config should also
-   * apply during simulation
+   *     Configuration is attempted 5 times before giving up. most of the config should also apply
+   *     during simulation
    */
   public Pigeon2IO(int deviceID, CANBus canbus, Pigeon2Configuration config) {
     this(
@@ -60,10 +61,11 @@ public class Pigeon2IO extends GyroIO {
 
   /**
    * Creates a new {@link Pigeon2}
+   *
    * @param deviceID The CAN ID of the {@link Pigeon2}
    * @param config A {@link Pigeon2Configuration} that is applied to this {@link Pigeon2}.
-   * Configuration is attempted 5 times before giving up. most of the config should also
-   * apply during simulation
+   *     Configuration is attempted 5 times before giving up. most of the config should also apply
+   *     during simulation
    */
   public Pigeon2IO(int deviceID, Pigeon2Configuration config) {
     this(deviceID, new CANBus(), config);

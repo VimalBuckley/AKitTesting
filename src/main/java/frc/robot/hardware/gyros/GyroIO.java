@@ -6,15 +6,11 @@ import frc.robot.utilities.Loggable;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * A class used to interface with gyros
- */
+/** A class used to interface with gyros */
 public abstract class GyroIO implements IOLayer, Loggable {
   private GyroIOInputsAutoLogged inputs;
 
-  /**
-   * Creates a new {@link GyroIO}
-   */
+  /** Creates a new {@link GyroIO} */
   public GyroIO() {
     inputs = new GyroIOInputsAutoLogged();
     Robot.ios.add(this);
@@ -47,16 +43,17 @@ public abstract class GyroIO implements IOLayer, Loggable {
   }
 
   /**
-   * Updates the given inputs to contain the gyros's current state.
-   * This should really only be used for sim purposes to allow for multiple
-   * sim runs per loop, as using it breaks the IO layer contract, and thus breaks
-   * replaying for the surrounding code.
+   * Updates the given inputs to contain the gyros's current state. This should really only be used
+   * for sim purposes to allow for multiple sim runs per loop, as using it breaks the IO layer
+   * contract, and thus breaks replaying for the surrounding code.
+   *
    * @param inputs The inputs to be updated
    */
   public abstract void updateInputs(GyroIOInputs inputs);
 
   /**
    * Steps the gyro's simulation forward dt seconds. The gyro will use the provided inputs
+   *
    * @param velocity The velocity of the gyro at the end of the timestep, in radians/second
    * @param dt The magnitude of the timestep
    * @param inputs The inputs to use for the simulation

@@ -5,26 +5,25 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.function.Consumer;
 
-/**
- * A class that wraps a {@link TalonFX} in an IO layer through {@link MotorIO}
- */
+/** A class that wraps a {@link TalonFX} in an IO layer through {@link MotorIO} */
 public class TalonFXIO extends MotorIO {
   private TalonFX motor;
 
   /**
    * Creates a new {@link TalonFX}
-   * @param deviceID The CAN ID of the {@link TalonFX} 
+   *
+   * @param deviceID The CAN ID of the {@link TalonFX}
    * @param canbus The canbus this motor is connected to
-   * @param config A method that takes in a {@link TalonFX}, and configures it as 
-   * the caller sees fit. Most of the config should also apply during simulation
-   * @param model A {@link DCMotor} that represents the motor that this TalonFX is controlling. Do not apply a
-   * gear ratio to this object, as gear ratios are dealt with separately. Also, do not set the motor count to more than one.
+   * @param config A method that takes in a {@link TalonFX}, and configures it as the caller sees
+   *     fit. Most of the config should also apply during simulation
+   * @param model A {@link DCMotor} that represents the motor that this TalonFX is controlling. Do
+   *     not apply a gear ratio to this object, as gear ratios are dealt with separately. Also, do
+   *     not set the motor count to more than one.
    */
   public TalonFXIO(int deviceID, CANBus canbus, Consumer<TalonFX> config, DCMotor model) {
     super(model);
@@ -35,11 +34,13 @@ public class TalonFXIO extends MotorIO {
 
   /**
    * Creates a new {@link TalonFX}
-   * @param deviceID The CAN ID of the {@link TalonFX} 
-   * @param config A method that takes in a {@link TalonFX}, and configures it as 
-   * the caller sees fit. Most of the config should also apply during simulation
-   * @param model A {@link DCMotor} that represents the motor that this TalonFX is controlling. Do not apply a
-   * gear ratio to this object, as gear ratios are dealt with separately. Also, do not set the motor count to more than one.
+   *
+   * @param deviceID The CAN ID of the {@link TalonFX}
+   * @param config A method that takes in a {@link TalonFX}, and configures it as the caller sees
+   *     fit. Most of the config should also apply during simulation
+   * @param model A {@link DCMotor} that represents the motor that this TalonFX is controlling. Do
+   *     not apply a gear ratio to this object, as gear ratios are dealt with separately. Also, do
+   *     not set the motor count to more than one.
    */
   public TalonFXIO(int deviceID, Consumer<TalonFX> config, DCMotor model) {
     this(deviceID, new CANBus(), config, model);
@@ -47,13 +48,15 @@ public class TalonFXIO extends MotorIO {
 
   /**
    * Creates a new {@link TalonFX}
-   * @param deviceID The CAN ID of the {@link TalonFX} 
+   *
+   * @param deviceID The CAN ID of the {@link TalonFX}
    * @param canbus The canbus this motor is connected to
    * @param config A {@link TalonFXConfiguration} that is applied to this {@link TalonFX}.
-   * Configuration is attempted 5 times before giving up. Most of the config should also
-   * apply during simulation
-   * @param model A {@link DCMotor} that represents the motor that this TalonFX is controlling. Do not apply a
-   * gear ratio to this object, as gear ratios are dealt with separately. Also, do not set the motor count to more than one.
+   *     Configuration is attempted 5 times before giving up. Most of the config should also apply
+   *     during simulation
+   * @param model A {@link DCMotor} that represents the motor that this TalonFX is controlling. Do
+   *     not apply a gear ratio to this object, as gear ratios are dealt with separately. Also, do
+   *     not set the motor count to more than one.
    */
   public TalonFXIO(int deviceID, CANBus canbus, TalonFXConfiguration config, DCMotor model) {
     this(
@@ -70,12 +73,14 @@ public class TalonFXIO extends MotorIO {
 
   /**
    * Creates a new {@link TalonFX}
-   * @param deviceID The CAN ID of the {@link TalonFX} 
+   *
+   * @param deviceID The CAN ID of the {@link TalonFX}
    * @param config A {@link TalonFXConfiguration} that is applied to this {@link TalonFX}.
-   * Configuration is attempted 5 times before giving up. Most of the config should also
-   * apply during simulation
-   * @param model A {@link DCMotor} that represents the motor that this TalonFX is controlling. Do not apply a
-   * gear ratio to this object, as gear ratios are dealt with separately. Also, do not set the motor count to more than one.
+   *     Configuration is attempted 5 times before giving up. Most of the config should also apply
+   *     during simulation
+   * @param model A {@link DCMotor} that represents the motor that this TalonFX is controlling. Do
+   *     not apply a gear ratio to this object, as gear ratios are dealt with separately. Also, do
+   *     not set the motor count to more than one.
    */
   public TalonFXIO(int deviceID, TalonFXConfiguration config, DCMotor model) {
     this(deviceID, new CANBus(), config, model);

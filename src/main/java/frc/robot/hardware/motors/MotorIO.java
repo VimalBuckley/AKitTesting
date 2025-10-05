@@ -8,9 +8,7 @@ import frc.robot.utilities.Loggable;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * A class used to interface with motor controllers
- */
+/** A class used to interface with motor controllers */
 public abstract class MotorIO implements Loggable, IOLayer {
   private DCMotor model;
   private MotorIOInputsAutoLogged inputs;
@@ -28,8 +26,10 @@ public abstract class MotorIO implements Loggable, IOLayer {
 
   /**
    * Creates a new {@link MotorIO}
-   * @param model A {@link DCMotor} that represents the motor that this motor controller is controlling. Do not apply a
-   * gear ratio to this object, as gear ratios are dealt with separately. Also, do not set the motor count to more than one.
+   *
+   * @param model A {@link DCMotor} that represents the motor that this motor controller is
+   *     controlling. Do not apply a gear ratio to this object, as gear ratios are dealt with
+   *     separately. Also, do not set the motor count to more than one.
    */
   public MotorIO(DCMotor model) {
     this.model = model;
@@ -39,28 +39,32 @@ public abstract class MotorIO implements Loggable, IOLayer {
 
   /**
    * Tells the motor to apply the given voltage
+   *
    * @param volts The stator voltage to apply to the motor
    */
   public abstract void setVoltage(double volts);
 
   /**
    * Resets the position of the motor's encoder
+   *
    * @param newValue The new position of the motor's encoder, in radians of the motor shaft
    */
   public abstract void setPosition(double newValue);
 
   /**
-   * Updates the given inputs to contain the motor's current state.
-   * This should really only be used for sim purposes to allow for multiple
-   * sim runs per loop, as using it breaks the IO layer contract, and thus breaks
-   * replaying for the surrounding code.
+   * Updates the given inputs to contain the motor's current state. This should really only be used
+   * for sim purposes to allow for multiple sim runs per loop, as using it breaks the IO layer
+   * contract, and thus breaks replaying for the surrounding code.
+   *
    * @param inputs The inputs to be updated
    */
   public abstract void updateInputs(MotorIOInputs inputs);
 
   /**
    * Steps the motor's simulation forward dt seconds. The motor will use the provided inputs
-   * @param velocity The velocity of the motor at the end of the timestep, in radians/second at the motor shaft
+   *
+   * @param velocity The velocity of the motor at the end of the timestep, in radians/second at the
+   *     motor shaft
    * @param dt The magnitude of the timestep
    * @param inputs The inputs to use for the simulation
    */
@@ -93,7 +97,7 @@ public abstract class MotorIO implements Loggable, IOLayer {
   public double getVoltage() {
     return inputs.statorVoltage;
   }
-  
+
   @Override
   public void updateInputs() {
     updateInputs(inputs);

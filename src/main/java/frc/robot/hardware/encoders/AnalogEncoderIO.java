@@ -5,9 +5,7 @@ import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import java.util.function.Consumer;
 
-/**
- * A class that wraps a {@link AnalongEncoder} in an IO layer through {@link AbsoluteEncoderIO}
- */
+/** A class that wraps a {@link AnalongEncoder} in an IO layer through {@link AbsoluteEncoderIO} */
 public class AnalogEncoderIO extends AbsoluteEncoderIO {
   private AnalogEncoder encoder;
   private double offset;
@@ -15,10 +13,11 @@ public class AnalogEncoderIO extends AbsoluteEncoderIO {
 
   /**
    * Creates a new {@link AnalongEncoder}
+   *
    * @param channel The analog port this encoder is plugged into
    * @param offset The reading on the encoder, in radians, when its position should be zero
-   * @param config A method that takes in a {@link AnalogEncoder} and configures it
-   * as the caller sees fit
+   * @param config A method that takes in a {@link AnalogEncoder} and configures it as the caller
+   *     sees fit
    */
   public AnalogEncoderIO(int channel, double offset, Consumer<AnalogEncoder> config) {
     super();

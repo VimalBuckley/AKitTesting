@@ -12,20 +12,20 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import java.util.function.Consumer;
 
-/**
- * A class that wraps a {@link SparkMax} in an IO layer through {@link MotorIO}
- */
+/** A class that wraps a {@link SparkMax} in an IO layer through {@link MotorIO} */
 public class SparkMaxIO extends MotorIO {
   private SparkMax motor;
   private SparkMaxSim sim;
 
   /**
    * Creates a new {@link SparkMax}
+   *
    * @param deviceID The CAN ID of the SparkMax
-   * @param config A method that takes in a {@link SparkMax}, and configures it as 
-   * the caller sees fit. Most of the config should also apply during simulation 
-   * @param model A {@link DCMotor} that represents the motor that this SparkMax is controlling. Do not apply a
-   * gear ratio to this object, as gear ratios are dealt with separately. Also, do not set the motor count to more than one.
+   * @param config A method that takes in a {@link SparkMax}, and configures it as the caller sees
+   *     fit. Most of the config should also apply during simulation
+   * @param model A {@link DCMotor} that represents the motor that this SparkMax is controlling. Do
+   *     not apply a gear ratio to this object, as gear ratios are dealt with separately. Also, do
+   *     not set the motor count to more than one.
    */
   public SparkMaxIO(int deviceID, Consumer<SparkMax> config, DCMotor model) {
     super(model);
@@ -36,10 +36,11 @@ public class SparkMaxIO extends MotorIO {
 
   /**
    * Creates a new {@link SparkMax}
+   *
    * @param deviceID The CAN ID of the SparkMax
-   * @param config A {@link SparkMaxConfig} that is applied to this {@link SparkMax}.
-   * Configuration is attempted 5 times before giving up. Most of the config should also
-   * apply during simulation 
+   * @param config A {@link SparkMaxConfig} that is applied to this {@link SparkMax}. Configuration
+   *     is attempted 5 times before giving up. Most of the config should also apply during
+   *     simulation
    * @param model A model of the motor being controlled by this SparkMax
    */
   public SparkMaxIO(int deviceID, SparkMaxConfig config, DCMotor model) {
