@@ -20,25 +20,6 @@ public class Flywheel extends SubsystemBase implements Loggable {
   public Flywheel(
       MotorIO motor,
       int simsPerLoop,
-      double gearReduction,
-      double massMomentOfInertia,
-      FeedbackController feedbackController) {
-    this(
-        motor,
-        simsPerLoop,
-        gearReduction,
-        0,
-        1 / motor.getModel().KvRadPerSecPerVolt * gearReduction,
-        massMomentOfInertia
-            * motor.getModel().nominalVoltageVolts
-            / gearReduction
-            / motor.getModel().stallTorqueNewtonMeters,
-        feedbackController);
-  }
-
-  public Flywheel(
-      MotorIO motor,
-      int simsPerLoop,
       double conversionFactor,
       double kS,
       double kV,
@@ -51,6 +32,25 @@ public class Flywheel extends SubsystemBase implements Loggable {
     this.kV = kV;
     this.kA = kA;
     this.feedbackController = feedbackController;
+  }
+
+  public static Flywheel fromIdealValues(
+      MotorIO motor,
+      int simsPerLoop,
+      double gearReduction,
+      double massMomentOfInertia,
+      FeedbackController feedbackController) {
+    return new Flywheel(
+        motor,
+        simsPerLoop,
+        gearReduction,
+        0,
+        1 / motor.getModel().KvRadPerSecPerVolt * gearReduction,
+        massMomentOfInertia
+            * motor.getModel().nominalVoltageVolts
+            / gearReduction
+            / motor.getModel().stallTorqueNewtonMeters,
+        feedbackController);
   }
 
   public void setTargetSpeed(double speed) {

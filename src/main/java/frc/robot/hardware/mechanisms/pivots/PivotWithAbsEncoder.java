@@ -13,26 +13,6 @@ public class PivotWithAbsEncoder extends Pivot {
       MotorIO motor,
       AbsoluteEncoderIO absEncoder,
       int simsPerLoop,
-      double gearReduction,
-      double massMomentOfInertia,
-      double pivotMass,
-      double centerOfMassLength,
-      FeedbackController feedbackController) {
-    super(
-        motor,
-        simsPerLoop,
-        gearReduction,
-        massMomentOfInertia,
-        pivotMass,
-        centerOfMassLength,
-        feedbackController);
-    this.absEncoder = absEncoder;
-  }
-
-  public PivotWithAbsEncoder(
-      MotorIO motor,
-      AbsoluteEncoderIO absEncoder,
-      int simsPerLoop,
       double conversionFactor,
       double kG,
       double kS,
@@ -41,6 +21,35 @@ public class PivotWithAbsEncoder extends Pivot {
       FeedbackController feedbackController) {
     super(motor, simsPerLoop, conversionFactor, kG, kS, kV, kA, feedbackController);
     this.absEncoder = absEncoder;
+  }
+
+  public static PivotWithAbsEncoder fromIdealValues(
+      MotorIO motor,
+      AbsoluteEncoderIO absEncoder,
+      int simsPerLoop,
+      double gearReduction,
+      double massMomentOfInertia,
+      double pivotMass,
+      double centerOfMassLength,
+      FeedbackController feedbackController) {
+    return new PivotWithAbsEncoder(
+        motor,
+        absEncoder,
+        simsPerLoop,
+        gearReduction,
+        pivotMass
+            * 9.81
+            * centerOfMassLength
+            * motor.getModel().nominalVoltageVolts
+            / gearReduction
+            / motor.getModel().stallTorqueNewtonMeters,
+        0,
+        1 / motor.getModel().KvRadPerSecPerVolt * gearReduction,
+        massMomentOfInertia
+            * motor.getModel().nominalVoltageVolts
+            / gearReduction
+            / motor.getModel().stallTorqueNewtonMeters,
+        feedbackController);
   }
 
   @Override

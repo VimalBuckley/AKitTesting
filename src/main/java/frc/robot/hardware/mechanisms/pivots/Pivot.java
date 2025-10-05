@@ -21,12 +21,31 @@ public class Pivot extends SubsystemBase implements Loggable {
   public Pivot(
       MotorIO motor,
       int simsPerLoop,
+      double conversionFactor,
+      double kG,
+      double kS,
+      double kV,
+      double kA,
+      FeedbackController feedbackController) {
+    this.motor = motor;
+    this.simsPerLoop = simsPerLoop;
+    this.conversionFactor = conversionFactor;
+    this.kG = kG;
+    this.kS = kS;
+    this.kV = kV;
+    this.kA = kA;
+    this.feedbackController = feedbackController;
+  }
+
+  public static Pivot fromIdealValues(
+      MotorIO motor,
+      int simsPerLoop,
       double gearReduction,
       double massMomentOfInertia,
       double pivotMass,
       double centerOfMassLength,
       FeedbackController feedbackController) {
-    this(
+    return new Pivot(
         motor,
         simsPerLoop,
         gearReduction,
@@ -43,25 +62,6 @@ public class Pivot extends SubsystemBase implements Loggable {
             / gearReduction
             / motor.getModel().stallTorqueNewtonMeters,
         feedbackController);
-  }
-
-  public Pivot(
-      MotorIO motor,
-      int simsPerLoop,
-      double conversionFactor,
-      double kG,
-      double kS,
-      double kV,
-      double kA,
-      FeedbackController feedbackController) {
-    this.motor = motor;
-    this.simsPerLoop = simsPerLoop;
-    this.conversionFactor = conversionFactor;
-    this.kG = kG;
-    this.kS = kS;
-    this.kV = kV;
-    this.kA = kA;
-    this.feedbackController = feedbackController;
   }
 
   public void setTargetAngle(double angle) {
