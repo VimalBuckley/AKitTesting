@@ -305,6 +305,7 @@ public abstract class MotorIO implements Loggable, IOLayer {
 
   public static MotorIO makeSim(DCMotor model, MotorIOConfig config) {
     return new MotorIO(model, config) {
+      MotorIOConfig hardwareConfig;
       double position = 0;
       double velocity = 0;
       double targetVoltage = 0;
@@ -326,21 +327,23 @@ public abstract class MotorIO implements Loggable, IOLayer {
         inputs.supplyVoltage = RobotController.getBatteryVoltage();
         inputs.temperature = 0;
         double kV = 1 / model.KvRadPerSecPerVolt;
-        double maxVoltage1 = config.statorLimit * model.rOhms + kV * inputs.velocity;
-        double minVoltage1 = -config.statorLimit * model.rOhms + kV * inputs.velocity;
-        double maxVoltage2 = inputs.supplyVoltage * config.supplyLimit / config.statorLimit;
+        double maxVoltage1 = hardwareConfig.statorLimit * model.rOhms + kV * inputs.velocity;
+        double minVoltage1 = -hardwareConfig.statorLimit * model.rOhms + kV * inputs.velocity;
+        double maxVoltage2 = inputs.supplyVoltage * hardwareConfig.supplyLimit / hardwareConfig.statorLimit;
         double minVoltage2 = -maxVoltage2;
         inputs.statorVoltage =
             MathUtil.clamp(
                 targetVoltage,
-                Math.max(minVoltage1, Math.max(minVoltage2, config.maxNegativeVoltage)),
-                Math.min(maxVoltage1, Math.min(maxVoltage2, config.maxPositiveVoltage)));
+                Math.max(minVoltage1, Math.max(minVoltage2, hardwareConfig.maxNegativeVoltage)),
+                Math.min(maxVoltage1, Math.min(maxVoltage2, hardwareConfig.maxPositiveVoltage)));
         inputs.statorCurrent = (inputs.statorVoltage - kV * inputs.velocity) / model.rOhms;
         inputs.supplyCurrent = inputs.statorVoltage / inputs.supplyVoltage * inputs.statorCurrent;
       }
 
       @Override
-      protected void applyConfigToHardware(MotorIOConfig config) {}
+      protected void applyConfigToHardware(MotorIOConfig config) {
+        config.copyTo(hardwareConfig);
+      }
 
       @Override
       public void updateSim(double position, double velocity) {

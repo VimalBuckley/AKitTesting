@@ -90,16 +90,17 @@ public abstract class AbsoluteEncoderIO implements IOLayer, Loggable {
     }
     return new AbsoluteEncoderIO(config) {
       AnalogEncoder encoder = new AnalogEncoder(channel);
-
+      double zeroReading = 0;
       @Override
       public void updateInputs(AbsoluteEncoderIOInputs inputs) {
         inputs.position =
-            MathUtil.angleModulus(Units.rotationsToRadians(encoder.get()) - config.zeroReading);
+            MathUtil.angleModulus(Units.rotationsToRadians(encoder.get()) - zeroReading);
       }
 
       @Override
       protected void applyConfigToHardware(AbsoluteEncoderIOConfig config) {
         encoder.setInverted(config.inverted);
+        zeroReading = config.zeroReading;
       }
     };
   }

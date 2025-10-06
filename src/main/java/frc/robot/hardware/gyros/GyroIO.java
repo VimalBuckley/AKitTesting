@@ -124,9 +124,10 @@ public abstract class GyroIO implements IOLayer, Loggable {
     return new GyroIO(config) {
       Pigeon2 gyro = new Pigeon2(deviceID, canbus);
       double inverted = 1;
+      double zeroReading = 0;
       @Override
       public void updateInputs(GyroIOInputs inputs) {
-        inputs.angle = Units.degreesToRadians(gyro.getYaw().getValueAsDouble() * inverted) - config.zeroReading;
+        inputs.angle = Units.degreesToRadians(gyro.getYaw().getValueAsDouble() * inverted) - zeroReading;
         inputs.velocity = Units.degreesToRadians(gyro.getAngularVelocityZWorld().getValueAsDouble() * inverted);
         inputs.isConnected = gyro.isConnected();
       }
@@ -134,6 +135,7 @@ public abstract class GyroIO implements IOLayer, Loggable {
       @Override
       public void applyConfigToHardware(GyroIOConfig config) {
         inverted = config.inverted ? -1 : 1;
+        zeroReading = config.zeroReading;
       }
     };
   }
