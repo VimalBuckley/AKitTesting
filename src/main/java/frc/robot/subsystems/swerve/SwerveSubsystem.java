@@ -8,7 +8,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.hardware.gyros.NavXIO;
+import frc.robot.hardware.gyros.GyroIO;
+import frc.robot.hardware.gyros.GyroIOConfig;
 import frc.robot.hardware.mechanisms.swerve.SwerveDrive;
 import frc.robot.hardware.mechanisms.swerve.SwerveModule;
 import frc.robot.hardware.tagCameras.TagCameraIO;
@@ -26,7 +27,7 @@ public class SwerveSubsystem extends SubsystemBase implements Loggable {
               SwerveConstants.BACK_LEFT_MODULE,
               SwerveConstants.BACK_RIGHT_MODULE
             },
-            new NavXIO(NavXComType.kMXP_SPI),
+            GyroIO.makeNavX(NavXComType.kMXP_SPI, new GyroIOConfig()),
             new TagCameraIO[] {},
             new ChassisSpeeds(5, 5, 6),
             5.4,
