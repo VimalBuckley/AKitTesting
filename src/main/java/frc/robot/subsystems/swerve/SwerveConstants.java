@@ -16,8 +16,8 @@ import frc.robot.utilities.FeedbackController.PIDFeedback;
 public class SwerveConstants {
   private static final MotorIOConfig DRIVE_CONFIG =
       new MotorIOConfig()
-          .withStatorLimit(60)
-          .withSupplyLimit(60)
+          .withStatorLimit(120)
+          .withSupplyLimit(80)
           .withNeutralMode(NeutralModeValue.Brake)
           .withOutputRange(-12, 12);
 
@@ -38,7 +38,7 @@ public class SwerveConstants {
               new CANBus(),
               DCMotor.getKrakenX60(1),
               DRIVE_CONFIG.withInversion(InvertedValue.Clockwise_Positive)),
-          new PIDFeedback(1.96850393701),
+          new PIDFeedback(0.6),
           5.143,
           1,
           0.19635,
@@ -46,7 +46,7 @@ public class SwerveConstants {
           0.009937496,
           MotorIO.makeSparkMax(
               SwerveWiring.FRONT_LEFT_ANGLE_ID, DCMotor.getNeo550(1), ANGLE_CONFIG),
-          new PIDFeedback(5.72957795131),
+          new PIDFeedback(5.72957795131, pid -> pid.enableContinuousInput(-Math.PI, Math.PI)),
           25,
           1,
           0.25348,
@@ -65,7 +65,7 @@ public class SwerveConstants {
               new CANBus(),
               DCMotor.getKrakenX60(1),
               DRIVE_CONFIG.withInversion(InvertedValue.CounterClockwise_Positive)),
-          new PIDFeedback(1.96850393701),
+          new PIDFeedback(0.6),
           5.143,
           1,
           0.20427,
@@ -73,7 +73,7 @@ public class SwerveConstants {
           0.012937236,
           MotorIO.makeSparkMax(
               SwerveWiring.FRONT_RIGHT_ANGLE_ID, DCMotor.getNeo550(1), ANGLE_CONFIG),
-          new PIDFeedback(5.72957795131),
+          new PIDFeedback(5.72957795131, pid -> pid.enableContinuousInput(-Math.PI, Math.PI)),
           25,
           1,
           0.27701,
@@ -92,14 +92,14 @@ public class SwerveConstants {
               new CANBus(),
               DCMotor.getKrakenX60(1),
               DRIVE_CONFIG.withInversion(InvertedValue.Clockwise_Positive)),
-          new PIDFeedback(1.96850393701),
+          new PIDFeedback(0.6),
           5.143,
           1,
           0.2049,
           0.10245852,
           0.01343152,
           MotorIO.makeSparkMax(SwerveWiring.BACK_LEFT_ANGLE_ID, DCMotor.getNeo550(1), ANGLE_CONFIG),
-          new PIDFeedback(5.72957795131),
+          new PIDFeedback(5.72957795131, pid -> pid.enableContinuousInput(-Math.PI, Math.PI)),
           25,
           1,
           0.25886,
@@ -118,7 +118,7 @@ public class SwerveConstants {
               new CANBus(),
               DCMotor.getKrakenX60(1),
               DRIVE_CONFIG.withInversion(InvertedValue.CounterClockwise_Positive)),
-          new PIDFeedback(1.96850393701),
+          new PIDFeedback(0.6),
           5.143,
           1,
           0.20206,
@@ -126,7 +126,7 @@ public class SwerveConstants {
           0.009241536,
           MotorIO.makeSparkMax(
               SwerveWiring.BACK_RIGHT_ANGLE_ID, DCMotor.getNeo550(1), ANGLE_CONFIG),
-          new PIDFeedback(5.72957795131),
+          new PIDFeedback(5.72957795131, pid -> pid.enableContinuousInput(-Math.PI, Math.PI)),
           25,
           1,
           0.25348,
