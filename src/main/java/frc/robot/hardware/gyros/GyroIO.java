@@ -1,6 +1,8 @@
 package frc.robot.hardware.gyros;
 
+import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.Constants.Mode;
 import frc.robot.hardware.IOLayer;
 import frc.robot.utilities.Loggable;
 import org.littletonrobotics.junction.AutoLog;
@@ -88,6 +90,9 @@ public abstract class GyroIO implements IOLayer, Loggable {
   }
 
   public static GyroIO makeNavX(NavXComType connectionType, GyroIOConfig config) {
+    if (Constants.currentMode == Mode.SIM) {
+      return makeSim(config);
+    }
     return new GyroIO(config) {
       AHRS gyro = new AHRS(connectionType);
       double inverted = 1;
@@ -107,6 +112,9 @@ public abstract class GyroIO implements IOLayer, Loggable {
   }
 
   public static GyroIO makePigeon2(int deviceID, CANBus canbus, GyroIOConfig config) {
+    if (Constants.currentMode == Mode.SIM) {
+      return makeSim(config);
+    }
     return new GyroIO(config) {
       Pigeon2 gyro = new Pigeon2(deviceID, canbus);
       double inverted = 1;
