@@ -111,15 +111,17 @@ public class Pivot extends SubsystemBase implements Loggable {
     MotorIOInputs inputs = new MotorIOInputs();
     for (int i = 0; i < simsPerLoop; i++) {
       motor.updateInputs(inputs);
+      // acceleration in mechanism units
       double acceleration =
           (motor.getVoltage()
                   - kG * Math.cos(inputs.position / conversionFactor)
                   - kS * Math.signum(inputs.velocity)
                   - kV * inputs.velocity / conversionFactor)
               / kA;
-      double velocity = inputs.velocity / conversionFactor + 0.02 / simsPerLoop * acceleration;
-      velocity *= conversionFactor;
-      motor.updateSim(velocity, 0.02 / simsPerLoop, inputs);
+      acceleration *= conversionFactor; // now in motor units
+      double velocity = inputs.velocity + acceleration * 0.02 / simsPerLoop;
+      double position = inputs.position + velocity * 0.02 / simsPerLoop;
+      motor.updateSim(position, acceleration);
     }
   }
 

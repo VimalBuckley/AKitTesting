@@ -1,33 +1,50 @@
 package frc.robot.subsystems.swerve;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.robot.WiringConstants.SwerveWiring;
 import frc.robot.hardware.encoders.AnalogEncoderIO;
 import frc.robot.hardware.mechanisms.swerve.SwerveModule;
-import frc.robot.hardware.motors.SparkMaxIO;
-import frc.robot.hardware.motors.TalonFXIO;
+import frc.robot.hardware.motors.MotorIO;
+import frc.robot.hardware.motors.MotorIOConfig;
 import frc.robot.utilities.FeedbackController.PIDFeedback;
 
 public class SwerveConstants {
+  private static final MotorIOConfig DRIVE_CONFIG = new MotorIOConfig()
+    .withStatorLimit(60)
+    .withSupplyLimit(60)
+    .withNeutralMode(NeutralModeValue.Brake)
+    .withOutputRange(-12, 12);
+
+  private static final MotorIOConfig ANGLE_CONFIG = new MotorIOConfig()
+    .withStatorLimit(20)
+    .withSupplyLimit(20)
+    .withInversion(InvertedValue.CounterClockwise_Positive)
+    .withNeutralMode(NeutralModeValue.Coast)
+    .withOutputRange(-12, 12);
+
   public static final SwerveModule FRONT_LEFT_MODULE =
       SwerveModule.fromMeasuredValues(
           new Translation2d(0.368, 0.266),
           0.0467733641327,
-          new TalonFXIO(
+          MotorIO.makeTalonFX(
               SwerveWiring.FRONT_LEFT_DRIVE_ID,
-              new TalonFXConfiguration(),
-              DCMotor.getKrakenX60(1)),
+              new CANBus(),
+              DCMotor.getKrakenX60(1),
+              DRIVE_CONFIG.withInversion(InvertedValue.Clockwise_Positive)),
           new PIDFeedback(1.96850393701),
           5.143,
           1,
           0.19635,
           0.10308336,
           0.009937496,
-          new SparkMaxIO(
-              SwerveWiring.FRONT_LEFT_ANGLE_ID, new SparkMaxConfig(), DCMotor.getNeo550(1)),
+          MotorIO.makeSparkMax(
+              SwerveWiring.FRONT_LEFT_ANGLE_ID, 
+              DCMotor.getNeo550(1),
+              ANGLE_CONFIG),
           new PIDFeedback(5.72957795131),
           25,
           1,
@@ -40,18 +57,21 @@ public class SwerveConstants {
       SwerveModule.fromMeasuredValues(
           new Translation2d(0.368, -0.266),
           0.0467733641327,
-          new TalonFXIO(
+          MotorIO.makeTalonFX(
               SwerveWiring.FRONT_RIGHT_DRIVE_ID,
-              new TalonFXConfiguration(),
-              DCMotor.getKrakenX60(1)),
+              new CANBus(),
+              DCMotor.getKrakenX60(1),
+              DRIVE_CONFIG.withInversion(InvertedValue.CounterClockwise_Positive)),
           new PIDFeedback(1.96850393701),
           5.143,
           1,
           0.20427,
           0.10233152,
           0.012937236,
-          new SparkMaxIO(
-              SwerveWiring.FRONT_RIGHT_ANGLE_ID, new SparkMaxConfig(), DCMotor.getNeo550(1)),
+          MotorIO.makeSparkMax(
+              SwerveWiring.FRONT_RIGHT_ANGLE_ID, 
+              DCMotor.getNeo550(1),
+              ANGLE_CONFIG),
           new PIDFeedback(5.72957795131),
           25,
           1,
@@ -64,16 +84,21 @@ public class SwerveConstants {
       SwerveModule.fromMeasuredValues(
           new Translation2d(-0.368, 0.266),
           0.0467733641327,
-          new TalonFXIO(
-              SwerveWiring.BACK_LEFT_DRIVE_ID, new TalonFXConfiguration(), DCMotor.getKrakenX60(1)),
+          MotorIO.makeTalonFX(
+              SwerveWiring.BACK_LEFT_DRIVE_ID, 
+              new CANBus(),
+              DCMotor.getKrakenX60(1),
+              DRIVE_CONFIG.withInversion(InvertedValue.Clockwise_Positive)),
           new PIDFeedback(1.96850393701),
           5.143,
           1,
           0.2049,
           0.10245852,
           0.01343152,
-          new SparkMaxIO(
-              SwerveWiring.BACK_LEFT_ANGLE_ID, new SparkMaxConfig(), DCMotor.getNeo550(1)),
+          MotorIO.makeSparkMax(
+              SwerveWiring.BACK_LEFT_ANGLE_ID, 
+              DCMotor.getNeo550(1),
+              ANGLE_CONFIG),
           new PIDFeedback(5.72957795131),
           25,
           1,
@@ -86,18 +111,21 @@ public class SwerveConstants {
       SwerveModule.fromMeasuredValues(
           new Translation2d(-0.368, -0.266),
           0.0467733641327,
-          new TalonFXIO(
+          MotorIO.makeTalonFX(
               SwerveWiring.BACK_RIGHT_DRIVE_ID,
-              new TalonFXConfiguration(),
-              DCMotor.getKrakenX60(1)),
+              new CANBus(),
+              DCMotor.getKrakenX60(1),
+              DRIVE_CONFIG.withInversion(InvertedValue.CounterClockwise_Positive)),
           new PIDFeedback(1.96850393701),
           5.143,
           1,
           0.20206,
           0.10634472,
           0.009241536,
-          new SparkMaxIO(
-              SwerveWiring.BACK_RIGHT_ANGLE_ID, new SparkMaxConfig(), DCMotor.getNeo550(1)),
+          MotorIO.makeSparkMax(
+              SwerveWiring.BACK_RIGHT_ANGLE_ID, 
+              DCMotor.getNeo550(1),
+              ANGLE_CONFIG),
           new PIDFeedback(5.72957795131),
           25,
           1,

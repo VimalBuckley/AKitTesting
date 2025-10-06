@@ -100,14 +100,16 @@ public class Flywheel extends SubsystemBase implements Loggable {
     MotorIOInputs inputs = new MotorIOInputs();
     for (int i = 0; i < simsPerLoop; i++) {
       motor.updateInputs(inputs);
+      // acceleration in mechanism units
       double acceleration =
           (inputs.statorVoltage
                   - kV * inputs.velocity / conversionFactor
                   - kS * Math.signum(inputs.velocity))
               / kA;
-      double velocity = inputs.velocity / conversionFactor + acceleration * 0.02 / simsPerLoop;
-      velocity *= conversionFactor;
-      motor.updateSim(velocity, 0.02 / simsPerLoop, inputs);
+      acceleration *= conversionFactor; // now in motor units
+      double velocity = inputs.velocity + acceleration * 0.02 / simsPerLoop;
+      double position = inputs.position + velocity * 0.02 / simsPerLoop;
+      motor.updateSim(position, velocity);
     }
   }
 

@@ -64,16 +64,19 @@ public class PivotWithAbsEncoder extends Pivot {
     for (int i = 0; i < simsPerLoop; i++) {
       motor.updateInputs(motorInputs);
       absEncoder.updateInputs(encoderInputs);
+      // acceleration in mechanism units
       double acceleration =
           (motor.getVoltage()
                   - kG * Math.cos(encoderInputs.position)
                   - kS * Math.signum(motorInputs.velocity)
                   - kV * motorInputs.velocity / conversionFactor)
               / kA;
-      double velocity = motorInputs.velocity / conversionFactor + 0.02 / simsPerLoop * acceleration;
+      acceleration *= conversionFactor;
+      double velocity = motorInputs.velocity + acceleration * 0.02 / simsPerLoop;
+      double position = motorInputs.position + velocity * 0.02 / simsPerLoop;
+      motor.updateSim(position, velocity);
       absEncoder.updateSim(velocity, 0.02 / simsPerLoop, encoderInputs);
       velocity *= conversionFactor;
-      motor.updateSim(velocity, 0.02 / simsPerLoop, motorInputs);
     }
   }
 
