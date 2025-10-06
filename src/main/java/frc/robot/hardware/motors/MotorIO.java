@@ -304,8 +304,8 @@ public abstract class MotorIO implements Loggable, IOLayer {
   }
 
   public static MotorIO makeSim(DCMotor model, MotorIOConfig config) {
+    MotorIOConfig hardwareConfig = new MotorIOConfig();
     return new MotorIO(model, config) {
-      MotorIOConfig hardwareConfig;
       double position = 0;
       double velocity = 0;
       double targetVoltage = 0;
@@ -329,7 +329,8 @@ public abstract class MotorIO implements Loggable, IOLayer {
         double kV = 1 / model.KvRadPerSecPerVolt;
         double maxVoltage1 = hardwareConfig.statorLimit * model.rOhms + kV * inputs.velocity;
         double minVoltage1 = -hardwareConfig.statorLimit * model.rOhms + kV * inputs.velocity;
-        double maxVoltage2 = inputs.supplyVoltage * hardwareConfig.supplyLimit / hardwareConfig.statorLimit;
+        double maxVoltage2 =
+            inputs.supplyVoltage * hardwareConfig.supplyLimit / hardwareConfig.statorLimit;
         double minVoltage2 = -maxVoltage2;
         inputs.statorVoltage =
             MathUtil.clamp(

@@ -24,7 +24,9 @@ public abstract class AbsoluteEncoderIO implements IOLayer, Loggable {
   /** Creates a new {@link AbsoluteEncoderIO} */
   public AbsoluteEncoderIO(AbsoluteEncoderIOConfig config) {
     inputs = new AbsoluteEncoderIOInputsAutoLogged();
+    this.config = new AbsoluteEncoderIOConfig();
     applyConfig(config);
+    updateInputs();
     Robot.ios.add(this);
   }
 
@@ -91,6 +93,7 @@ public abstract class AbsoluteEncoderIO implements IOLayer, Loggable {
     return new AbsoluteEncoderIO(config) {
       AnalogEncoder encoder = new AnalogEncoder(channel);
       double zeroReading = 0;
+
       @Override
       public void updateInputs(AbsoluteEncoderIOInputs inputs) {
         inputs.position =

@@ -1,19 +1,17 @@
 package frc.robot.hardware.gyros;
 
-import frc.robot.Constants;
-import frc.robot.Robot;
-import frc.robot.Constants.Mode;
-import frc.robot.hardware.IOLayer;
-import frc.robot.utilities.Loggable;
-import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
-
 import edu.wpi.first.math.util.Units;
+import frc.robot.Constants;
+import frc.robot.Constants.Mode;
+import frc.robot.Robot;
+import frc.robot.hardware.IOLayer;
+import frc.robot.utilities.Loggable;
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 /** A class used to interface with gyros */
 public abstract class GyroIO implements IOLayer, Loggable {
@@ -23,7 +21,9 @@ public abstract class GyroIO implements IOLayer, Loggable {
   /** Creates a new {@link GyroIO} */
   public GyroIO(GyroIOConfig config) {
     inputs = new GyroIOInputsAutoLogged();
-
+    this.config = new GyroIOConfig();
+    applyConfig(config);
+    updateInputs();
     Robot.ios.add(this);
   }
 
@@ -99,6 +99,7 @@ public abstract class GyroIO implements IOLayer, Loggable {
     return new GyroIO(config) {
       AHRS gyro = new AHRS(connectionType);
       double inverted = 1;
+
       @Override
       public void updateInputs(GyroIOInputs inputs) {
         inputs.angle = Units.degreesToRadians(-gyro.getAngle() * inverted);
@@ -125,10 +126,13 @@ public abstract class GyroIO implements IOLayer, Loggable {
       Pigeon2 gyro = new Pigeon2(deviceID, canbus);
       double inverted = 1;
       double zeroReading = 0;
+
       @Override
       public void updateInputs(GyroIOInputs inputs) {
-        inputs.angle = Units.degreesToRadians(gyro.getYaw().getValueAsDouble() * inverted) - zeroReading;
-        inputs.velocity = Units.degreesToRadians(gyro.getAngularVelocityZWorld().getValueAsDouble() * inverted);
+        inputs.angle =
+            Units.degreesToRadians(gyro.getYaw().getValueAsDouble() * inverted) - zeroReading;
+        inputs.velocity =
+            Units.degreesToRadians(gyro.getAngularVelocityZWorld().getValueAsDouble() * inverted);
         inputs.isConnected = gyro.isConnected();
       }
 
@@ -144,6 +148,7 @@ public abstract class GyroIO implements IOLayer, Loggable {
     return new GyroIO(config) {
       double position;
       double velocity;
+
       @Override
       public void updateInputs(GyroIOInputs inputs) {
         inputs.angle = position;
