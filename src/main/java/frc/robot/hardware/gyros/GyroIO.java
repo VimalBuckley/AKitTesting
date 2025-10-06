@@ -93,6 +93,9 @@ public abstract class GyroIO implements IOLayer, Loggable {
     if (Constants.currentMode == Mode.SIM) {
       return makeSim(config);
     }
+    if (Constants.currentMode == Mode.REPLAY) {
+      return makeEmpty(config);
+    }
     return new GyroIO(config) {
       AHRS gyro = new AHRS(connectionType);
       double inverted = 1;
@@ -114,6 +117,9 @@ public abstract class GyroIO implements IOLayer, Loggable {
   public static GyroIO makePigeon2(int deviceID, CANBus canbus, GyroIOConfig config) {
     if (Constants.currentMode == Mode.SIM) {
       return makeSim(config);
+    }
+    if (Constants.currentMode == Mode.REPLAY) {
+      return makeEmpty(config);
     }
     return new GyroIO(config) {
       Pigeon2 gyro = new Pigeon2(deviceID, canbus);
@@ -151,7 +157,19 @@ public abstract class GyroIO implements IOLayer, Loggable {
 
       @Override
       public void applyConfigToHardware(GyroIOConfig config) {}
+    };
+  }
 
+  public static GyroIO makeEmpty(GyroIOConfig config) {
+    return new GyroIO(config) {
+      @Override
+      public void updateInputs(GyroIOInputs inputs) {}
+
+      @Override
+      public void applyConfigToHardware(GyroIOConfig config) {}
+
+      @Override
+      public void updateSim(double position, double velocity) {}
     };
   }
 }

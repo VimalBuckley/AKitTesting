@@ -154,6 +154,9 @@ public abstract class MotorIO implements Loggable, IOLayer {
     if (Constants.currentMode == Mode.SIM) {
       return makeSim(model, config);
     }
+    if (Constants.currentMode == Mode.REPLAY) {
+      return makeEmpty(model, config);
+    }
     return new MotorIO(model, config) {
       TalonFX motor = new TalonFX(deviceID, canbus);
 
@@ -202,6 +205,9 @@ public abstract class MotorIO implements Loggable, IOLayer {
     if (Constants.currentMode == Mode.SIM) {
       return makeSim(model, config);
     }
+    if (Constants.currentMode == Mode.REPLAY) {
+      return makeEmpty(model, config);
+    }
     return new MotorIO(model, config) {
       TalonFXS motor = new TalonFXS(deviceID, canbus);
 
@@ -246,10 +252,13 @@ public abstract class MotorIO implements Loggable, IOLayer {
   }
 
   public static MotorIO makeSparkMax(int deviceID, DCMotor model, MotorIOConfig config) {
+    // Disable supply limit, since SparkMax's don't support it
+    config.supplyLimit = config.statorLimit;
     if (Constants.currentMode == Mode.SIM) {
-      // Disable supply limit, since SparkMax's don't support it
-      config.supplyLimit = config.statorLimit;
       return makeSim(model, config);
+    }
+    if (Constants.currentMode == Mode.REPLAY) {
+      return makeEmpty(model, config);
     }
     return new MotorIO(model, config) {
       SparkMax motor = new SparkMax(deviceID, MotorType.kBrushless);
@@ -339,5 +348,24 @@ public abstract class MotorIO implements Loggable, IOLayer {
         this.velocity = velocity;
       }
     };
+  }
+
+  public static MotorIO makeEmpty(DCMotor model, MotorIOConfig config) {
+      return new MotorIO(model, config) {
+        @Override
+        public void setVoltage(double volts) {}
+
+        @Override
+        public void setPosition(double newValue) {}
+
+        @Override
+        public void updateInputs(MotorIOInputs inputs) {}
+
+        @Override
+        protected void applyConfigToHardware(MotorIOConfig config) {}
+        
+        @Override
+        public void updateSim(double position, double velocity) {}
+      };
   }
 }

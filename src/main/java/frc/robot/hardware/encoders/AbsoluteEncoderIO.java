@@ -85,6 +85,9 @@ public abstract class AbsoluteEncoderIO implements IOLayer, Loggable {
     if (Constants.currentMode == Mode.SIM) {
       return makeSim(config);
     }
+    if (Constants.currentMode == Mode.REPLAY) {
+      return makeEmpty(config);
+    }
     return new AbsoluteEncoderIO(config) {
       AnalogEncoder encoder = new AnalogEncoder(channel);
 
@@ -105,6 +108,9 @@ public abstract class AbsoluteEncoderIO implements IOLayer, Loggable {
       int deviceID, CANBus canbus, AbsoluteEncoderIOConfig config) {
     if (Constants.currentMode == Mode.SIM) {
       return makeSim(config);
+    }
+    if (Constants.currentMode == Mode.REPLAY) {
+      return makeEmpty(config);
     }
     return new AbsoluteEncoderIO(config) {
       CANcoder encoder = new CANcoder(deviceID, canbus);
@@ -148,6 +154,19 @@ public abstract class AbsoluteEncoderIO implements IOLayer, Loggable {
       public void updateSim(double position) {
         this.position = position;
       }
+    };
+  }
+
+  public static AbsoluteEncoderIO makeEmpty(AbsoluteEncoderIOConfig config) {
+    return new AbsoluteEncoderIO(config) {
+      @Override
+      public void updateInputs(AbsoluteEncoderIOInputs inputs) {}
+
+      @Override
+      protected void applyConfigToHardware(AbsoluteEncoderIOConfig config) {}
+
+      @Override
+      public void updateSim(double position) {}
     };
   }
 }
