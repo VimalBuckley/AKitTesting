@@ -74,7 +74,5 @@ public class Elevator {
         feedbackController);
   }
 
-  public static interface ElevatorConfiguration {
-    
-  }
+  public static interface ElevatorConfiguration {}
 }

@@ -1,19 +1,5 @@
 package frc.robot.hardware.motors;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.Constants;
-import frc.robot.Robot;
-import frc.robot.Constants.Mode;
-import frc.robot.hardware.IOLayer;
-import frc.robot.utilities.Loggable;
-
-import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.Logger;
-
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -22,13 +8,25 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.TalonFXS;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.REVLibError;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+import frc.robot.Constants;
+import frc.robot.Constants.Mode;
+import frc.robot.Robot;
+import frc.robot.hardware.IOLayer;
+import frc.robot.utilities.Loggable;
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 /** A class used to interface with motor controllers */
 public abstract class MotorIO implements Loggable, IOLayer {
@@ -152,16 +150,13 @@ public abstract class MotorIO implements Loggable, IOLayer {
   }
 
   public static MotorIO makeTalonFX(
-    int deviceID,
-    CANBus canbus,
-    DCMotor model,
-    MotorIOConfig config
-  ) {
+      int deviceID, CANBus canbus, DCMotor model, MotorIOConfig config) {
     if (Constants.currentMode == Mode.SIM) {
       return makeSim(model, config);
     }
     return new MotorIO(model, config) {
       TalonFX motor = new TalonFX(deviceID, canbus);
+
       @Override
       public void setVoltage(double volts) {
         motor.setVoltage(volts);
@@ -185,34 +180,31 @@ public abstract class MotorIO implements Loggable, IOLayer {
 
       @Override
       public void applyConfigToHardware(MotorIOConfig config) {
-          TalonFXConfiguration fxConfig = new TalonFXConfiguration();
-          fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-          fxConfig.CurrentLimits.StatorCurrentLimit = config.statorLimit;
-          fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-          fxConfig.CurrentLimits.SupplyCurrentLimit = config.supplyLimit;
-          fxConfig.MotorOutput.Inverted = config.inversion;
-          fxConfig.MotorOutput.NeutralMode = config.neutralMode;
-          fxConfig.Voltage.PeakForwardVoltage = config.maxPositiveVoltage;
-          fxConfig.Voltage.PeakReverseVoltage = config.maxNegativeVoltage;
-          StatusCode status = StatusCode.StatusCodeNotInitialized;
-          for (int i = 0; i < 5 && status != StatusCode.OK; i++) {
-            status = motor.getConfigurator().apply(fxConfig);
-          }
+        TalonFXConfiguration fxConfig = new TalonFXConfiguration();
+        fxConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        fxConfig.CurrentLimits.StatorCurrentLimit = config.statorLimit;
+        fxConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        fxConfig.CurrentLimits.SupplyCurrentLimit = config.supplyLimit;
+        fxConfig.MotorOutput.Inverted = config.inversion;
+        fxConfig.MotorOutput.NeutralMode = config.neutralMode;
+        fxConfig.Voltage.PeakForwardVoltage = config.maxPositiveVoltage;
+        fxConfig.Voltage.PeakReverseVoltage = config.maxNegativeVoltage;
+        StatusCode status = StatusCode.StatusCodeNotInitialized;
+        for (int i = 0; i < 5 && status != StatusCode.OK; i++) {
+          status = motor.getConfigurator().apply(fxConfig);
+        }
       }
     };
   }
 
   public static MotorIO makeTalonFXS(
-    int deviceID,
-    CANBus canbus,
-    DCMotor model,
-    MotorIOConfig config
-  ) {
+      int deviceID, CANBus canbus, DCMotor model, MotorIOConfig config) {
     if (Constants.currentMode == Mode.SIM) {
       return makeSim(model, config);
     }
     return new MotorIO(model, config) {
       TalonFXS motor = new TalonFXS(deviceID, canbus);
+
       @Override
       public void setVoltage(double volts) {
         motor.setVoltage(volts);
@@ -236,35 +228,32 @@ public abstract class MotorIO implements Loggable, IOLayer {
 
       @Override
       public void applyConfigToHardware(MotorIOConfig config) {
-          TalonFXSConfiguration fxsConfig = new TalonFXSConfiguration();
-          fxsConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-          fxsConfig.CurrentLimits.StatorCurrentLimit = config.statorLimit;
-          fxsConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-          fxsConfig.CurrentLimits.SupplyCurrentLimit = config.supplyLimit;
-          fxsConfig.MotorOutput.Inverted = config.inversion;
-          fxsConfig.MotorOutput.NeutralMode = config.neutralMode;
-          fxsConfig.Voltage.PeakForwardVoltage = config.maxPositiveVoltage;
-          fxsConfig.Voltage.PeakReverseVoltage = config.maxNegativeVoltage;
-          StatusCode status = StatusCode.StatusCodeNotInitialized;
-          for (int i = 0; i < 5 && status != StatusCode.OK; i++) {
-            status = motor.getConfigurator().apply(fxsConfig);
-          }
+        TalonFXSConfiguration fxsConfig = new TalonFXSConfiguration();
+        fxsConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+        fxsConfig.CurrentLimits.StatorCurrentLimit = config.statorLimit;
+        fxsConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+        fxsConfig.CurrentLimits.SupplyCurrentLimit = config.supplyLimit;
+        fxsConfig.MotorOutput.Inverted = config.inversion;
+        fxsConfig.MotorOutput.NeutralMode = config.neutralMode;
+        fxsConfig.Voltage.PeakForwardVoltage = config.maxPositiveVoltage;
+        fxsConfig.Voltage.PeakReverseVoltage = config.maxNegativeVoltage;
+        StatusCode status = StatusCode.StatusCodeNotInitialized;
+        for (int i = 0; i < 5 && status != StatusCode.OK; i++) {
+          status = motor.getConfigurator().apply(fxsConfig);
+        }
       }
     };
   }
 
-  public static MotorIO makeSparkMax(
-    int deviceID,
-    DCMotor model,
-    MotorIOConfig config
-  ) {
+  public static MotorIO makeSparkMax(int deviceID, DCMotor model, MotorIOConfig config) {
     if (Constants.currentMode == Mode.SIM) {
       // Disable supply limit, since SparkMax's don't support it
-      config.supplyLimit = config.statorLimit; 
+      config.supplyLimit = config.statorLimit;
       return makeSim(model, config);
     }
     return new MotorIO(model, config) {
       SparkMax motor = new SparkMax(deviceID, MotorType.kBrushless);
+
       @Override
       public void setVoltage(double volts) {
         motor.setVoltage(volts);
@@ -280,7 +269,8 @@ public abstract class MotorIO implements Loggable, IOLayer {
         inputs.statorVoltage = motor.getAppliedOutput() * motor.getBusVoltage();
         inputs.supplyVoltage = motor.getBusVoltage();
         inputs.position = Units.rotationsToRadians(motor.getEncoder().getPosition());
-        inputs.velocity = Units.rotationsPerMinuteToRadiansPerSecond(motor.getEncoder().getVelocity());
+        inputs.velocity =
+            Units.rotationsPerMinuteToRadiansPerSecond(motor.getEncoder().getVelocity());
         inputs.statorCurrent = motor.getOutputCurrent();
         inputs.supplyCurrent = motor.getAppliedOutput() * inputs.statorCurrent;
         inputs.temperature = motor.getMotorTemperature();
@@ -291,24 +281,25 @@ public abstract class MotorIO implements Loggable, IOLayer {
         SparkMaxConfig sparkConfig = new SparkMaxConfig();
         sparkConfig.smartCurrentLimit(config.statorLimit);
         sparkConfig.inverted(config.inversion == InvertedValue.Clockwise_Positive);
-        sparkConfig.idleMode(config.neutralMode == NeutralModeValue.Brake ? IdleMode.kBrake : IdleMode.kCoast);
-        sparkConfig.closedLoop.outputRange(config.maxNegativeVoltage / 12, config.maxPositiveVoltage / 12);
+        sparkConfig.idleMode(
+            config.neutralMode == NeutralModeValue.Brake ? IdleMode.kBrake : IdleMode.kCoast);
+        sparkConfig.closedLoop.outputRange(
+            config.maxNegativeVoltage / 12, config.maxPositiveVoltage / 12);
         REVLibError status = REVLibError.kUnknown;
-          for (int i = 0; i < 5 && status != REVLibError.kOk; i++) {
-            motor.configure(sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-          }
+        for (int i = 0; i < 5 && status != REVLibError.kOk; i++) {
+          motor.configure(
+              sparkConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        }
       }
     };
   }
 
-  public static MotorIO makeSim(
-    DCMotor model,
-    MotorIOConfig config
-  ) {
+  public static MotorIO makeSim(DCMotor model, MotorIOConfig config) {
     return new MotorIO(model, config) {
       double position = 0;
       double velocity = 0;
       double targetVoltage = 0;
+
       @Override
       public void setVoltage(double volts) {
         targetVoltage = volts;
@@ -330,7 +321,11 @@ public abstract class MotorIO implements Loggable, IOLayer {
         double minVoltage1 = -config.statorLimit * model.rOhms + kV * inputs.velocity;
         double maxVoltage2 = inputs.supplyVoltage * config.supplyLimit / config.statorLimit;
         double minVoltage2 = -maxVoltage2;
-        inputs.statorVoltage = MathUtil.clamp(targetVoltage, Math.max(minVoltage1, minVoltage2), Math.min(maxVoltage1, maxVoltage2));
+        inputs.statorVoltage =
+            MathUtil.clamp(
+                targetVoltage,
+                Math.max(minVoltage1, Math.max(minVoltage2, config.maxNegativeVoltage)),
+                Math.min(maxVoltage1, Math.min(maxVoltage2, config.maxPositiveVoltage)));
         inputs.statorCurrent = (inputs.statorVoltage - kV * inputs.velocity) / model.rOhms;
         inputs.supplyCurrent = inputs.statorVoltage / inputs.supplyVoltage * inputs.statorCurrent;
       }
@@ -340,8 +335,8 @@ public abstract class MotorIO implements Loggable, IOLayer {
 
       @Override
       public void updateSim(double position, double velocity) {
-          this.position = position;
-          this.velocity = velocity;
+        this.position = position;
+        this.velocity = velocity;
       }
     };
   }
