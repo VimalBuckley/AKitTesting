@@ -7,6 +7,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.hardware.encoders.AbsoluteEncoderIO;
 import frc.robot.hardware.mechanisms.flywheels.Flywheel;
+import frc.robot.hardware.mechanisms.flywheels.FlywheelStates.FlywheelTarget;
 import frc.robot.hardware.mechanisms.pivots.Pivot;
 import frc.robot.hardware.mechanisms.pivots.PivotWithAbsEncoder;
 import frc.robot.hardware.motors.MotorIO;
@@ -52,12 +53,12 @@ public class SwerveModule implements Loggable {
     return new SwerveModule(
         new Flywheel(
             driveMotor,
-            driveSimsPerLoop,
             driveConversionFactor,
             drivekS,
             drivekV,
             drivekA,
-            driveFeedback),
+            driveFeedback,
+            driveSimsPerLoop),
         new PivotWithAbsEncoder(
             angleMotor,
             absoluteEncoder,
@@ -90,7 +91,6 @@ public class SwerveModule implements Loggable {
     return new SwerveModule(
         new Flywheel(
             driveMotor,
-            driveSimsPerLoop,
             driveGearReduction,
             0,
             1 / driveMotor.getModel().KvRadPerSecPerVolt * driveGearReduction,
@@ -99,7 +99,8 @@ public class SwerveModule implements Loggable {
                 * wheelRadius
                 * wheelRadius
                 / (numModules * driveGearReduction * driveMotor.getModel().stallTorqueNewtonMeters),
-            driveFeedback),
+            driveFeedback,
+            driveSimsPerLoop),
         PivotWithAbsEncoder.fromIdealValues(
             angleMotor,
             absoluteEncoder,
@@ -133,7 +134,6 @@ public class SwerveModule implements Loggable {
     return new SwerveModule(
         new Flywheel(
             driveMotor,
-            driveSimsPerLoop,
             driveGearReduction,
             0,
             1 / driveMotor.getModel().KvRadPerSecPerVolt * driveGearReduction,
@@ -142,7 +142,8 @@ public class SwerveModule implements Loggable {
                 * wheelRadius
                 * wheelRadius
                 / (numModules * driveGearReduction * driveMotor.getModel().stallTorqueNewtonMeters),
-            driveFeedback),
+            driveFeedback,
+            driveSimsPerLoop),
         new PivotWithAbsEncoder(
             angleMotor,
             absoluteEncoder,
@@ -163,13 +164,13 @@ public class SwerveModule implements Loggable {
 
   public SwerveModuleState getCurrentState() {
     return new SwerveModuleState(
-        drive.getVelocity() * wheelRadius,
+        drive.getState().velocity() * wheelRadius,
         Rotation2d.fromRadians(MathUtil.angleModulus(angle.getPosition())));
   }
 
   public SwerveModulePosition getCurrentPosition() {
     return new SwerveModulePosition(
-        drive.getPosition() * wheelRadius,
+        drive.getState().position() * wheelRadius,
         Rotation2d.fromRadians(MathUtil.angleModulus(angle.getPosition())));
   }
 
@@ -190,7 +191,7 @@ public class SwerveModule implements Loggable {
     dynamicTarget = new SwerveModuleState(this.target.speedMetersPerSecond, this.target.angle);
     dynamicTarget.optimize(currentState.angle);
     dynamicTarget.cosineScale(currentState.angle);
-    drive.setTargetSpeed(dynamicTarget.speedMetersPerSecond / wheelRadius);
+    drive.setTarget(new FlywheelTarget(dynamicTarget.speedMetersPerSecond / wheelRadius));
     angle.setTargetAngle(dynamicTarget.angle.getRadians());
   }
 

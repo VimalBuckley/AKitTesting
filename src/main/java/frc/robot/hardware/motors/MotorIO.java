@@ -355,21 +355,21 @@ public abstract class MotorIO implements Loggable, IOLayer {
   }
 
   public static MotorIO makeEmpty(DCMotor model, MotorIOConfig config) {
-      return new MotorIO(model, config) {
-        @Override
-        public void setVoltage(double volts) {}
+    return new MotorIO(model, config) {
+      @Override
+      public void setVoltage(double volts) {}
 
-        @Override
-        public void setPosition(double newValue) {}
+      @Override
+      public void setPosition(double newValue) {}
 
-        @Override
-        public void updateInputs(MotorIOInputs inputs) {}
+      @Override
+      public void updateInputs(MotorIOInputs inputs) {}
 
-        @Override
-        protected void applyConfigToHardware(MotorIOConfig config) {}
-        
-        @Override
-        public void updateSim(double position, double velocity) {}
-      };
+      @Override
+      protected void applyConfigToHardware(MotorIOConfig config) {}
+
+      @Override
+      public void updateSim(double position, double velocity) {}
+    };
   }
 }
