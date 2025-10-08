@@ -9,6 +9,7 @@ import frc.robot.hardware.encoders.AbsoluteEncoderIO;
 import frc.robot.hardware.mechanisms.flywheels.Flywheel;
 import frc.robot.hardware.mechanisms.flywheels.FlywheelStates.FlywheelTarget;
 import frc.robot.hardware.mechanisms.pivots.Pivot;
+import frc.robot.hardware.mechanisms.pivots.PivotStates.PivotTarget;
 import frc.robot.hardware.mechanisms.pivots.PivotWithAbsEncoder;
 import frc.robot.hardware.motors.MotorIO;
 import frc.robot.utilities.FeedbackController;
@@ -62,13 +63,13 @@ public class SwerveModule implements Loggable {
         new PivotWithAbsEncoder(
             angleMotor,
             absoluteEncoder,
-            angleSimsPerLoop,
             angleConversionFactor,
             0,
             anglekS,
             anglekV,
             anglekA,
-            angleFeedback),
+            angleFeedback,
+            angleSimsPerLoop),
         location,
         wheelRadius);
   }
@@ -147,13 +148,13 @@ public class SwerveModule implements Loggable {
         new PivotWithAbsEncoder(
             angleMotor,
             absoluteEncoder,
-            angleSimsPerLoop,
             angleConversionFactor,
             0,
             anglekS,
             anglekV,
             anglekA,
-            angleFeedback),
+            angleFeedback,
+            angleSimsPerLoop),
         moduleLocation,
         wheelRadius);
   }
@@ -165,13 +166,13 @@ public class SwerveModule implements Loggable {
   public SwerveModuleState getCurrentState() {
     return new SwerveModuleState(
         drive.getState().velocity() * wheelRadius,
-        Rotation2d.fromRadians(MathUtil.angleModulus(angle.getPosition())));
+        Rotation2d.fromRadians(MathUtil.angleModulus(angle.getState().position())));
   }
 
   public SwerveModulePosition getCurrentPosition() {
     return new SwerveModulePosition(
         drive.getState().position() * wheelRadius,
-        Rotation2d.fromRadians(MathUtil.angleModulus(angle.getPosition())));
+        Rotation2d.fromRadians(MathUtil.angleModulus(angle.getState().position())));
   }
 
   public Translation2d getModuleLocation() {
@@ -192,7 +193,7 @@ public class SwerveModule implements Loggable {
     dynamicTarget.optimize(currentState.angle);
     dynamicTarget.cosineScale(currentState.angle);
     drive.setTarget(new FlywheelTarget(dynamicTarget.speedMetersPerSecond / wheelRadius));
-    angle.setTargetAngle(dynamicTarget.angle.getRadians());
+    angle.setTarget(new PivotTarget(dynamicTarget.angle.getRadians()));
   }
 
   @Override

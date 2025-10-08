@@ -3,7 +3,6 @@ package frc.robot.utilities;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-
 import java.util.function.Consumer;
 
 public interface FeedbackController {
@@ -17,10 +16,7 @@ public interface FeedbackController {
 
   public void reset(double measurement);
 
-  public static record Setpoint(
-    double target,
-    double derivative
-  ) {}
+  public static record Setpoint(double target, double derivative) {}
 
   public static class PIDFeedback implements FeedbackController {
     private PIDController pid;

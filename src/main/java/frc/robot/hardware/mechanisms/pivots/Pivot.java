@@ -1,40 +1,38 @@
 package frc.robot.hardware.mechanisms.pivots;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.hardware.mechanisms.Mechanism;
+import frc.robot.hardware.mechanisms.pivots.PivotStates.PivotState;
+import frc.robot.hardware.mechanisms.pivots.PivotStates.PivotTarget;
 import frc.robot.hardware.motors.MotorIO;
 import frc.robot.hardware.motors.MotorIO.MotorIOInputs;
 import frc.robot.utilities.FeedbackController;
-import frc.robot.utilities.Loggable;
 
-public class Pivot extends SubsystemBase implements Loggable {
+public class Pivot extends Mechanism<PivotState, PivotTarget> {
   protected MotorIO motor;
-  protected double target;
-  protected boolean enabled;
   protected double conversionFactor;
   protected double kG;
   protected double kS;
   protected double kV;
   protected double kA;
-  protected int simsPerLoop;
-  protected FeedbackController feedbackController;
+  protected FeedbackController controller;
 
   public Pivot(
       MotorIO motor,
-      int simsPerLoop,
       double conversionFactor,
       double kG,
       double kS,
       double kV,
       double kA,
-      FeedbackController feedbackController) {
+      FeedbackController controller,
+      int simsPerLoop) {
+    super(simsPerLoop);
     this.motor = motor;
-    this.simsPerLoop = simsPerLoop;
     this.conversionFactor = conversionFactor;
     this.kG = kG;
     this.kS = kS;
     this.kV = kV;
     this.kA = kA;
-    this.feedbackController = feedbackController;
+    this.controller = controller;
   }
 
   public static Pivot fromIdealValues(
@@ -47,7 +45,6 @@ public class Pivot extends SubsystemBase implements Loggable {
       FeedbackController feedbackController) {
     return new Pivot(
         motor,
-        simsPerLoop,
         gearReduction,
         pivotMass
             * 9.81
@@ -61,32 +58,13 @@ public class Pivot extends SubsystemBase implements Loggable {
             * motor.getModel().nominalVoltageVolts
             / gearReduction
             / motor.getModel().stallTorqueNewtonMeters,
-        feedbackController);
+        feedbackController,
+        simsPerLoop);
   }
 
-  public void setTargetAngle(double angle) {
-    setTargetAngle(angle, true);
-  }
-
-  public void setTargetAngle(double angle, boolean enable) {
-    target = angle;
-    enabled = enable;
-  }
-
-  public void enableMechanism() {
-    enabled = true;
-  }
-
-  public void disableMechanism() {
-    enabled = false;
-  }
-
-  public double getPosition() {
-    return motor.getPosition() / conversionFactor;
-  }
-
-  public double getVelocity() {
-    return motor.getVelocity() / conversionFactor;
+  @Override
+  public void log(String name) {
+    motor.log(name, "Motor");
   }
 
   public MotorIO getPivotMotor() {
@@ -94,39 +72,35 @@ public class Pivot extends SubsystemBase implements Loggable {
   }
 
   @Override
-  public void periodic() {
-    if (!enabled) {
-      return;
-    }
-    double feedback = feedbackController.calculate(getPosition(), target);
-    double gravityVolts = Math.cos(getPosition()) * kG;
-    double staticVolts = Math.signum(getVelocity()) * kS;
-    double kineticVolts = feedbackController.getSetpoint().derivative() * kV;
+  public PivotState getState() {
+    return new PivotState(
+        motor.getPosition() / conversionFactor, motor.getVelocity() / conversionFactor);
+  }
+
+  @Override
+  protected void updateSim(double dt) {
+    MotorIOInputs inputs = new MotorIOInputs();
+    double acceleration =
+        (motor.getVoltage()
+                - kG * Math.cos(inputs.position / conversionFactor)
+                - kS * Math.signum(inputs.velocity)
+                - kV * inputs.velocity / conversionFactor)
+            / kA;
+    acceleration *= conversionFactor; // now in motor units
+    double velocity = inputs.velocity + acceleration * dt;
+    double position = inputs.position + velocity * dt;
+    motor.updateSim(position, acceleration);
+  }
+
+  @Override
+  protected void moveToTarget() {
+    PivotState current = getState();
+    PivotTarget target = getTarget().get();
+    double feedback = controller.calculate(current.position(), target.position());
+    double gravityVolts = Math.cos(current.position()) * kG;
+    double staticVolts = Math.signum(current.velocity()) * kS;
+    double kineticVolts = controller.getSetpoint().derivative() * kV;
     double feedforward = gravityVolts + staticVolts + kineticVolts;
     motor.setVoltage(feedback + feedforward);
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    MotorIOInputs inputs = new MotorIOInputs();
-    for (int i = 0; i < simsPerLoop; i++) {
-      motor.updateInputs(inputs);
-      // acceleration in mechanism units
-      double acceleration =
-          (motor.getVoltage()
-                  - kG * Math.cos(inputs.position / conversionFactor)
-                  - kS * Math.signum(inputs.velocity)
-                  - kV * inputs.velocity / conversionFactor)
-              / kA;
-      acceleration *= conversionFactor; // now in motor units
-      double velocity = inputs.velocity + acceleration * 0.02 / simsPerLoop;
-      double position = inputs.position + velocity * 0.02 / simsPerLoop;
-      motor.updateSim(position, acceleration);
-    }
-  }
-
-  @Override
-  public void log(String name) {
-    motor.log(name, "Motor");
   }
 }
