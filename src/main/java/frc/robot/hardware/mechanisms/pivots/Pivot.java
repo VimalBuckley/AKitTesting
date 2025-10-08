@@ -101,7 +101,7 @@ public class Pivot extends SubsystemBase implements Loggable {
     double feedback = feedbackController.calculate(getPosition(), target);
     double gravityVolts = Math.cos(getPosition()) * kG;
     double staticVolts = Math.signum(getVelocity()) * kS;
-    double kineticVolts = feedbackController.getSetpoint().getSecond();
+    double kineticVolts = feedbackController.getSetpoint().derivative() * kV;
     double feedforward = gravityVolts + staticVolts + kineticVolts;
     motor.setVoltage(feedback + feedforward);
   }

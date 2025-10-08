@@ -1,9 +1,9 @@
 package frc.robot.utilities;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+
 import java.util.function.Consumer;
 
 public interface FeedbackController {
@@ -11,11 +11,16 @@ public interface FeedbackController {
 
   public double getGoal();
 
-  public Pair<Double, Double> getSetpoint();
+  public Setpoint getSetpoint();
 
   public boolean atGoal();
 
   public void reset(double measurement);
+
+  public static record Setpoint(
+    double target,
+    double derivative
+  ) {}
 
   public static class PIDFeedback implements FeedbackController {
     private PIDController pid;
@@ -48,8 +53,8 @@ public interface FeedbackController {
     }
 
     @Override
-    public Pair<Double, Double> getSetpoint() {
-      return new Pair<Double, Double>(getGoal(), 0.);
+    public Setpoint getSetpoint() {
+      return new Setpoint(getGoal(), 0.);
     }
 
     @Override
@@ -101,8 +106,8 @@ public interface FeedbackController {
     }
 
     @Override
-    public Pair<Double, Double> getSetpoint() {
-      return new Pair<Double, Double>(pid.getSetpoint().position, pid.getSetpoint().velocity);
+    public Setpoint getSetpoint() {
+      return new Setpoint(pid.getSetpoint().position, pid.getSetpoint().velocity);
     }
 
     @Override

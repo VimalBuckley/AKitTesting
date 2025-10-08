@@ -84,8 +84,8 @@ public class Flywheel extends Mechanism<FlywheelState, FlywheelTarget> {
     FlywheelTarget target = getTarget().get();
     double feedback = controller.calculate(current.velocity(), target.velocity());
     double staticVolts = Math.signum(current.velocity()) * kS;
-    double kineticVolts = controller.getSetpoint().getFirst() * kV;
-    double accelVolts = controller.getSetpoint().getSecond() * kA;
+    double kineticVolts = controller.getSetpoint().target() * kV;
+    double accelVolts = controller.getSetpoint().derivative() * kA;
     double feedforward = staticVolts + kineticVolts + accelVolts;
     motor.setVoltage(feedback + feedforward);
   }
