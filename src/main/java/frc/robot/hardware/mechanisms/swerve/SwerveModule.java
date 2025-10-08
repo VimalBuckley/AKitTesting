@@ -102,15 +102,16 @@ public class SwerveModule implements Loggable {
                 / (numModules * driveGearReduction * driveMotor.getModel().stallTorqueNewtonMeters),
             driveFeedback,
             driveSimsPerLoop),
-        PivotWithAbsEncoder.fromIdealValues(
-            angleMotor,
-            absoluteEncoder,
-            angleSimsPerLoop,
-            angleGearReduction,
-            angleMassMomentOfInertia,
-            0,
-            0,
-            angleFeedback),
+        PivotWithAbsEncoder.fromPivot(
+            Pivot.fromIdealValues(
+                angleMotor,
+                angleGearReduction,
+                angleMassMomentOfInertia,
+                0,
+                0,
+                angleFeedback,
+                angleSimsPerLoop),
+            absoluteEncoder),
         moduleLocation,
         wheelRadius);
   }

@@ -39,6 +39,14 @@ public abstract class Mechanism<CurrentState, TargetState> extends SubsystemBase
     enabled = false;
   }
 
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public int getSimsPerLoop() {
+    return simsPerLoop;
+  }
+
   public Optional<TargetState> getTarget() {
     return target;
   }

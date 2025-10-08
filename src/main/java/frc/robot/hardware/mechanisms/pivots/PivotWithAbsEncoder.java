@@ -18,39 +18,23 @@ public class PivotWithAbsEncoder extends Pivot {
       double kS,
       double kV,
       double kA,
-      FeedbackController feedbackController,
+      FeedbackController controller,
       int simsPerLoop) {
-    super(motor, conversionFactor, kG, kS, kV, kA, feedbackController, simsPerLoop);
+    super(motor, conversionFactor, kG, kS, kV, kA, controller, simsPerLoop);
     this.absEncoder = absEncoder;
   }
 
-  public static PivotWithAbsEncoder fromIdealValues(
-      MotorIO motor,
-      AbsoluteEncoderIO absEncoder,
-      int simsPerLoop,
-      double gearReduction,
-      double massMomentOfInertia,
-      double pivotMass,
-      double centerOfMassLength,
-      FeedbackController feedbackController) {
+  public static PivotWithAbsEncoder fromPivot(Pivot pivot, AbsoluteEncoderIO absEncoder) {
     return new PivotWithAbsEncoder(
-        motor,
+        pivot.motor,
         absEncoder,
-        gearReduction,
-        pivotMass
-            * 9.81
-            * centerOfMassLength
-            * motor.getModel().nominalVoltageVolts
-            / gearReduction
-            / motor.getModel().stallTorqueNewtonMeters,
-        0,
-        1 / motor.getModel().KvRadPerSecPerVolt * gearReduction,
-        massMomentOfInertia
-            * motor.getModel().nominalVoltageVolts
-            / gearReduction
-            / motor.getModel().stallTorqueNewtonMeters,
-        feedbackController,
-        simsPerLoop);
+        pivot.conversionFactor,
+        pivot.kG,
+        pivot.kS,
+        pivot.kV,
+        pivot.kA,
+        pivot.controller,
+        pivot.getSimsPerLoop());
   }
 
   @Override

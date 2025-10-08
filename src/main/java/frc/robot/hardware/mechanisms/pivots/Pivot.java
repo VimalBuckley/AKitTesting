@@ -37,12 +37,12 @@ public class Pivot extends Mechanism<PivotState, PivotTarget> {
 
   public static Pivot fromIdealValues(
       MotorIO motor,
-      int simsPerLoop,
       double gearReduction,
       double massMomentOfInertia,
       double pivotMass,
       double centerOfMassLength,
-      FeedbackController feedbackController) {
+      FeedbackController feedbackController,
+      int simsPerLoop) {
     return new Pivot(
         motor,
         gearReduction,
